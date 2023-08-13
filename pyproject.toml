@@ -1,0 +1,41 @@
+[project]
+name = "crawlers"
+version = "0.1.0"
+description = "Crawlers for Japanese boatrace websites"
+authors = [
+    { name = "k0kishima", email = "okishimaxyz@gmail.com" }
+]
+dependencies = []
+readme = "README.md"
+requires-python = ">= 3.8"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.rye]
+managed = true
+dev_dependencies = []
+dev-dependencies = [
+    "mypy>=1.5.0",
+    "black>=23.7.0",
+]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.mypy]
+python_version = "3.11"
+check_untyped_defs = true
+ignore_missing_imports = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+strict_optional = true
+disallow_any_generics = true
+disallow_untyped_defs = true
+no_implicit_optional = true
+explicit_package_bases = true
+
+[tool.black]
+line-length = 100
+target-version = ['py310']
