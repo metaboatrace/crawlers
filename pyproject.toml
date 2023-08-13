@@ -18,6 +18,7 @@ managed = true
 dev_dependencies = []
 dev-dependencies = [
     "mypy>=1.5.0",
+    "black>=23.7.0",
 ]
 
 [tool.hatch.metadata]
@@ -34,3 +35,7 @@ disallow_any_generics = true
 disallow_untyped_defs = true
 no_implicit_optional = true
 explicit_package_bases = true
+
+[tool.black]
+line-length = 100
+target-version = ['py310']
