@@ -1,0 +1,13 @@
+{
+  "python.defaultInterpreterPath": ".venv/bin/python",
+  "python.linting.mypyEnabled": true,
+  "python.linting.mypyPath": ".venv/bin/mypy",
+  "python.linting.mypyArgs": ["--config-file=pyproject.toml"],
+  "editor.formatOnSave": true,
+  "[python]": {
+      "editor.codeActionsOnSave": {
+          "source.organizeImports": true
+      },
+      "editor.defaultFormatter": "ms-python.black-formatter"
+  }
+}
