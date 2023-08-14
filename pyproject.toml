@@ -5,9 +5,12 @@ description = "Crawlers for Japanese boatrace websites"
 authors = [
     { name = "k0kishima", email = "okishimaxyz@gmail.com" }
 ]
-dependencies = []
+dependencies = [
+    "metaboatrace.models>=0.0.1",
+    "metaboatrace.scrapers>=1.0.1",
+]
 readme = "README.md"
-requires-python = ">= 3.8"
+requires-python = ">= 3.11"
 
 [build-system]
 requires = ["hatchling"]

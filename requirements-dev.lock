@@ -7,11 +7,19 @@
 #   all-features: false
 
 -e file:.
+annotated-types==0.5.0
+beautifulsoup4==4.12.2
 black==23.7.0
 click==8.1.6
+metaboatrace-models==1.0.1
+metaboatrace-scrapers==1.0.1
 mypy==1.5.0
 mypy-extensions==1.0.0
+numpy==1.25.2
 packaging==23.1
 pathspec==0.11.2
 platformdirs==3.10.0
+pydantic==2.1.1
+pydantic-core==2.4.0
+soupsieve==2.4.1
 typing-extensions==4.7.1
