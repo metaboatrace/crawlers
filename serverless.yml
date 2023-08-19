@@ -11,7 +11,7 @@
 #
 # Happy Coding!
 
-service: crawlers
+service: metaboatrace-crawlers
 # app and org for use with dashboard.serverless.com
 #app: your-app-name
 #org: your-org-name
@@ -23,6 +23,9 @@ frameworkVersion: "3"
 provider:
   name: aws
   runtime: python3.11
+
+plugins:
+  - serverless-offline
 
 # you can overwrite defaults here
 #  stage: dev
@@ -59,8 +62,8 @@ provider:
 #    - include-me-dir/**
 
 functions:
-  hello:
-    handler: handler.hello
+  crawlRacerProfile:
+    handler: metaboatrace.handlers.racer_handler.crawl_racer_profile_handler
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details
