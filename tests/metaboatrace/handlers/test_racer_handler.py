@@ -1,13 +1,10 @@
 from typing import cast
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 from metaboatrace.scrapers.official.website.exceptions import DataNotFound
 
 from metaboatrace.handlers.racer_handler import Event, crawl_racer_profile_handler
-from metaboatrace.repositories import RacerRepository
-
-mock_repo = Mock(spec=RacerRepository)
 
 
 @pytest.fixture
@@ -23,7 +20,7 @@ def test_crawl_racer_profile_handler_success(
     mock_crawl_racer_from_racer_profile_page: MagicMock,
 ) -> None:
     event = cast(Event, {"racer_registration_number": 12345})
-    result = crawl_racer_profile_handler(event, {}, mock_repo)
+    result = crawl_racer_profile_handler(event, {})
     assert result == {"success": True}
 
 
@@ -33,7 +30,7 @@ def test_crawl_racer_profile_handler_data_not_found(
 ) -> None:
     mock_crawl_racer_from_racer_profile_page.side_effect = DataNotFound()
     event = cast(Event, {"racer_registration_number": 12345})
-    result = crawl_racer_profile_handler(event, {}, mock_repo)
+    result = crawl_racer_profile_handler(event, {})
     assert result == {"success": False, "errorCode": "RACER_NOT_FOUND"}
 
 
@@ -41,5 +38,5 @@ def test_crawl_racer_profile_handler_data_not_found(
 def test_crawl_racer_profile_handler_missing_racer_number() -> None:
     event = cast(Event, {})
     with pytest.raises(ValueError) as excinfo:
-        crawl_racer_profile_handler(event, {}, mock_repo)
+        crawl_racer_profile_handler(event, {})
     assert str(excinfo.value) == "racer_registration_number is missing in the event data"
