@@ -30,6 +30,7 @@ pydantic-core==2.4.0
 pytest==7.4.0
 requests==2.31.0
 soupsieve==2.4.1
+sqlalchemy==2.0.23
 types-requests==2.31.0.2
 types-urllib3==1.26.25.14
 typing-extensions==4.7.1
