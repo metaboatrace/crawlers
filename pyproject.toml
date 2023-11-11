@@ -12,6 +12,7 @@ dependencies = [
     "types-requests>=2.31.0.2",
     "injector>=0.21.0",
     "SQLAlchemy>=2.0.23",
+    "pymysql>=1.1.0",
 ]
 readme = "README.md"
 requires-python = ">= 3.11"
