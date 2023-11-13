@@ -1,7 +1,7 @@
 import os
 
 from sqlalchemy import create_engine
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import declarative_base, scoped_session, sessionmaker
 
 engine = create_engine(
     os.environ.get(
@@ -10,3 +10,6 @@ engine = create_engine(
 )
 
 Base = declarative_base()
+
+session_factory = sessionmaker(bind=engine)
+Session = scoped_session(session_factory)
