@@ -1,7 +1,8 @@
 from datetime import datetime
 from enum import Enum
 
-from sqlalchemy import Boolean, Column, DateTime, Float, Integer, String
+from sqlalchemy import Boolean, Column, Date, DateTime, Float, Integer, String, text
+from sqlalchemy.orm import relationship
 
 from ..database import Base
 
@@ -25,3 +26,23 @@ class Stadium(Base):
     elevation = Column(Float, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, nullable=False, onupdate=datetime.utcnow)
+
+
+class Event(Base):
+    __tablename__ = "events"
+
+    # hack: title を主キーはバグの温床
+    #
+    # タイトルが一文字でも違っていたら（例えば公式サイトのクロールを何回かかけたときにタイトルが更新されていたら）データが重複して冪等性が担保できなくなる
+    # かといってGPやCCみたいなダブル開催は [:stadium_tel_code, :starts_on] だけだと保持できないからすぐには解決策が浮かばない
+
+    stadium_tel_code = Column(Integer, primary_key=True)
+    starts_on = Column(Date, primary_key=True)
+    title = Column(String(255), primary_key=True)
+    grade = Column(Integer, nullable=False)
+    kind = Column(Integer, nullable=False)
+    canceled = Column(Boolean, server_default=text("false"), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, nullable=False, onupdate=datetime.utcnow)
+
+    stadium = relationship("Stadium", backref="events")
