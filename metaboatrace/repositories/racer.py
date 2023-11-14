@@ -1,9 +1,16 @@
+from enum import Enum
+
 from metaboatrace.models.racer import Racer as DomainRacer
 
 from metaboatrace.orm.database import Session
 from metaboatrace.orm.models.racer import Racer as OrmRacer
 
 from .base import Repository
+
+
+class RacerStatus(Enum):
+    active = 1
+    retired = 2
 
 
 class RacerRepository(Repository[DomainRacer]):
@@ -31,7 +38,7 @@ class RacerRepository(Repository[DomainRacer]):
                 entity.born_prefecture.value if entity.born_prefecture else None
             )
             orm_racer.height = entity.height
-            orm_racer.status = "active"
+            orm_racer.status = RacerStatus.active.value
 
             session.commit()
         except Exception as e:
