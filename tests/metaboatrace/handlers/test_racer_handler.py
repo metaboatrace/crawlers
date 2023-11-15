@@ -39,4 +39,4 @@ def test_crawl_racer_profile_handler_missing_racer_number() -> None:
     event = cast(Event, {})
     with pytest.raises(ValueError) as excinfo:
         crawl_racer_profile_handler(event, {})
-    assert str(excinfo.value) == "racer_registration_number is missing in the event data"
+    assert str(excinfo.value) == "racer_registration_number is missing in the event parameter"

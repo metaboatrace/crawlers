@@ -1,6 +1,6 @@
 from enum import Enum
 
-from metaboatrace.models.racer import Racer as DomainRacer
+from metaboatrace.models.racer import Racer as RacerEntity
 
 from metaboatrace.orm.database import Session
 from metaboatrace.orm.models.racer import Racer as OrmRacer
@@ -13,8 +13,8 @@ class RacerStatus(Enum):
     retired = 2
 
 
-class RacerRepository(Repository[DomainRacer]):
-    def create_or_update(self, entity: DomainRacer) -> bool:
+class RacerRepository(Repository[RacerEntity]):
+    def create_or_update(self, entity: RacerEntity) -> bool:
         session = Session()
 
         try:
@@ -48,3 +48,6 @@ class RacerRepository(Repository[DomainRacer]):
             session.close()
 
         return True
+
+    def create_or_update_many(self, data: list[RacerEntity]) -> bool:
+        raise NotImplementedError
