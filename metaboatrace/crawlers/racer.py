@@ -1,4 +1,3 @@
-from injector import inject
 from metaboatrace.models.racer import Racer
 from metaboatrace.scrapers.official.website.v1707.pages.racer.profile_page.location import (
     create_racer_profile_page_url,
@@ -11,7 +10,6 @@ from metaboatrace.crawlers.utils import fetch_html_as_io
 from metaboatrace.repositories import RacerRepository
 
 
-@inject
 def crawl_racer_from_racer_profile_page(
     racer_registration_number: int, repository: RacerRepository
 ) -> None:

@@ -10,7 +10,6 @@ dependencies = [
     "metaboatrace.scrapers>=1.0.1",
     "requests>=2.31.0",
     "types-requests>=2.31.0.2",
-    "injector>=0.21.0",
     "SQLAlchemy>=2.0.23",
     "pymysql>=1.1.0",
 ]

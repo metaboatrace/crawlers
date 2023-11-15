@@ -1,2 +1,2 @@
 from .racer import Racer
-from .stadium import Stadium
+from .stadium import Event, Stadium
