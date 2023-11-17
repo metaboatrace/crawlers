@@ -1,7 +1,6 @@
 import logging
 
 from metaboatrace.orm.database import Session
-from metaboatrace.orm.models import *
 from metaboatrace.orm.models import Stadium
 
 logging.basicConfig()
