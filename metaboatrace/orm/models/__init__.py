@@ -1,3 +1,4 @@
-from .race import Race
-from .racer import Racer
-from .stadium import Event, Stadium
+from .boat import *
+from .race import *
+from .racer import *
+from .stadium import *
