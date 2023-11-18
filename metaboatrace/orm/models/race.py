@@ -33,3 +33,15 @@ class CircumferenceExhibitionRecord(Base):
     exhibition_time_order = Column(Integer, nullable=False)
     created_at = Column(DateTime, nullable=False)
     updated_at = Column(DateTime, nullable=False)
+
+
+class DisqualifiedRaceEntry(Base):
+    __tablename__ = "disqualified_race_entries"
+
+    stadium_tel_code = Column(Integer, ForeignKey("stadiums.tel_code"), primary_key=True)
+    date = Column(Date, primary_key=True)
+    race_number = Column(Integer, primary_key=True)
+    pit_number = Column(Integer, primary_key=True)
+    disqualification = Column(Integer, nullable=False)
+    created_at = Column(DateTime, nullable=False)
+    updated_at = Column(DateTime, nullable=False)
