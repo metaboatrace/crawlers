@@ -40,8 +40,8 @@ class RaceEntry(Base):
     race_number = Column(Integer, primary_key=True)
     racer_registration_number = Column(Integer, nullable=False)
     pit_number = Column(Integer, primary_key=True)
-    created_at = Column(DateTime, nullable=False)
-    updated_at = Column(DateTime, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, nullable=False, onupdate=datetime.utcnow)
 
     __table_args__ = (
         UniqueConstraint(
@@ -54,6 +54,22 @@ class RaceEntry(Base):
     )
 
 
+class RaceRecord(Base):
+    __tablename__ = "race_records"
+
+    stadium_tel_code = Column(Integer, ForeignKey("stadiums.tel_code"), primary_key=True)
+    date = Column(Date, primary_key=True)
+    race_number = Column(Integer, primary_key=True)
+    pit_number = Column(Integer, primary_key=True)
+    course_number = Column(Integer, nullable=False)
+    start_time = Column(Float)
+    start_order = Column(Integer)
+    race_time = Column(Float)
+    arrival = Column(Integer)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, nullable=False, onupdate=datetime.utcnow)
+
+
 class CircumferenceExhibitionRecord(Base):
     __tablename__ = "circumference_exhibition_records"
 
@@ -63,8 +79,8 @@ class CircumferenceExhibitionRecord(Base):
     pit_number = Column(Integer, primary_key=True)
     exhibition_time = Column(Float, nullable=False)
     exhibition_time_order = Column(Integer, nullable=False)
-    created_at = Column(DateTime, nullable=False)
-    updated_at = Column(DateTime, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, nullable=False, onupdate=datetime.utcnow)
 
 
 class DisqualifiedRaceEntry(Base):
@@ -75,5 +91,5 @@ class DisqualifiedRaceEntry(Base):
     race_number = Column(Integer, primary_key=True)
     pit_number = Column(Integer, primary_key=True)
     disqualification = Column(Integer, nullable=False)
-    created_at = Column(DateTime, nullable=False)
-    updated_at = Column(DateTime, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, nullable=False, onupdate=datetime.utcnow)
