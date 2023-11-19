@@ -1,6 +1,16 @@
 from datetime import datetime
 
-from sqlalchemy import Boolean, Column, Date, DateTime, Float, Integer, String, text
+from sqlalchemy import (
+    Boolean,
+    Column,
+    Date,
+    DateTime,
+    Float,
+    Integer,
+    String,
+    UniqueConstraint,
+    text,
+)
 from sqlalchemy.sql.schema import ForeignKey
 
 from ..database import Base
@@ -20,6 +30,28 @@ class Race(Base):
     canceled = Column(Boolean, default=False, server_default=text("false"), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, nullable=False, onupdate=datetime.utcnow)
+
+
+class RaceEntry(Base):
+    __tablename__ = "race_entries"
+
+    stadium_tel_code = Column(Integer, ForeignKey("stadiums.tel_code"), primary_key=True)
+    date = Column(Date, primary_key=True)
+    race_number = Column(Integer, primary_key=True)
+    racer_registration_number = Column(Integer, nullable=False)
+    pit_number = Column(Integer, primary_key=True)
+    created_at = Column(DateTime, nullable=False)
+    updated_at = Column(DateTime, nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint(
+            "stadium_tel_code",
+            "date",
+            "race_number",
+            "racer_registration_number",
+            name="uniq_index_1",
+        ),
+    )
 
 
 class CircumferenceExhibitionRecord(Base):
