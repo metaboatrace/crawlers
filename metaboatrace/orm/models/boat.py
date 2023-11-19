@@ -29,6 +29,18 @@ class BoatSetting(Base):
     )
 
 
+class BoatBettingContributeRateAggregation(Base):
+    __tablename__ = "boat_betting_contribute_rate_aggregations"
+
+    stadium_tel_code = Column(Integer, ForeignKey("stadiums.tel_code"), primary_key=True)
+    boat_number = Column(Integer, primary_key=True)
+    aggregated_on = Column(Date, primary_key=True)
+    quinella_rate = Column(Float, nullable=False)
+    trio_rate = Column(Float)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
 class MotorBettingContributeRateAggregation(Base):
     __tablename__ = "motor_betting_contribute_rate_aggregations"
 
