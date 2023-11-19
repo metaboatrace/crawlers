@@ -54,6 +54,19 @@ class RaceEntry(Base):
     )
 
 
+class StartExhibitionRecord(Base):
+    __tablename__ = "start_exhibition_records"
+
+    stadium_tel_code = Column(Integer, ForeignKey("stadiums.tel_code"), primary_key=True)
+    date = Column(Date, primary_key=True)
+    race_number = Column(Integer, primary_key=True)
+    pit_number = Column(Integer, primary_key=True)
+    course_number = Column(Integer, nullable=False)
+    start_time = Column(Float, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, nullable=False, onupdate=datetime.utcnow)
+
+
 class RaceRecord(Base):
     __tablename__ = "race_records"
 
