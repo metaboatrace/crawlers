@@ -44,3 +44,20 @@ class Event(Base):
     canceled = Column(Boolean, server_default=text("false"), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, nullable=False, onupdate=datetime.utcnow)
+
+
+class WeatherCondition(Base):
+    __tablename__ = "weather_conditions"
+
+    stadium_tel_code = Column(Integer, ForeignKey("stadiums.tel_code"), primary_key=True)
+    date = Column(Date, primary_key=True)
+    race_number = Column(Integer, primary_key=True)
+    in_performance = Column(Boolean, primary_key=True)
+    weather = Column(Integer, nullable=False)
+    wind_velocity = Column(Float, nullable=False)
+    wind_angle = Column(Float)
+    wavelength = Column(Float)
+    air_temperature = Column(Float, nullable=False)
+    water_temperature = Column(Float, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, nullable=False, onupdate=datetime.utcnow)
