@@ -31,3 +31,14 @@ class RacerCondition(Base):
     adjust = Column(Float, nullable=False)
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
     updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class RacerWinningRateAggregation(Base):
+    __tablename__ = "racer_winning_rate_aggregations"
+
+    racer_registration_number = Column(Integer, primary_key=True)
+    aggregated_on = Column(Date, primary_key=True)
+    rate_in_all_stadium = Column(Float, nullable=False)
+    rate_in_event_going_stadium = Column(Float, nullable=False)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
