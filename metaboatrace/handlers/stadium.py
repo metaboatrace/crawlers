@@ -1,15 +1,18 @@
+from datetime import datetime
 from typing import Any, Dict, TypedDict, Union
 
 from metaboatrace.crawlers.stadium import crawl_events_from_monthly_schedule_page
 from metaboatrace.repositories import EventRepository
 
 
-class Event(TypedDict, total=False):
+class MonthlyScheduleHandlerEvent(TypedDict, total=False):
     year: int
     month: int
 
 
-def crawl_monthly_schedule_handler(event: Event, context: Any) -> Dict[str, Union[bool, str]]:
+def crawl_monthly_schedule_handler(
+    event: MonthlyScheduleHandlerEvent, context: Any
+) -> Dict[str, Union[bool, str]]:
     year = event.get("year")
     if year is None:
         raise ValueError("year is missing in the event parameter")

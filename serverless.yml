@@ -63,9 +63,9 @@ plugins:
 
 functions:
   crawlRacerProfile:
-    handler: metaboatrace.handlers.racer_handler.crawl_racer_profile_handler
+    handler: metaboatrace.handlers.racer.crawl_racer_profile_handler
   crawlMonthlySchedule:
-    handler: metaboatrace.handlers.stadium_handler.crawl_monthly_schedule_handler
+    handler: metaboatrace.handlers.stadium.crawl_monthly_schedule_handler
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details
