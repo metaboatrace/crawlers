@@ -1,9 +1,7 @@
-from datetime import date
-
 from metaboatrace.models.stadium import Event as EventEntity
 
 from metaboatrace.orm.database import Session
-from metaboatrace.orm.models.stadium import Event as OrmEvent
+from metaboatrace.orm.models.stadium import Event as EventOrm
 from metaboatrace.orm.strategies.upsert import create_upsert_strategy
 
 from .base import Repository
@@ -29,8 +27,8 @@ class EventRepository(Repository[EventEntity]):
         session = Session()
 
         return upsert_strategy(
-            session=session,
-            model=OrmEvent,
-            values=values,
-            on_duplicate_key_update=["grade", "kind"],
+            session,
+            EventOrm,
+            values,
+            ["grade", "kind"],
         )
