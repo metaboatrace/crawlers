@@ -1,4 +1,7 @@
 import logging
+from typing import cast
+
+from sqlalchemy.orm import Mapper
 
 from metaboatrace.orm.database import Session
 from metaboatrace.orm.models import Stadium
@@ -251,7 +254,7 @@ stadium_data = [
 
 session = Session()
 
-session.bulk_insert_mappings(Stadium, stadium_data)
+session.bulk_insert_mappings(cast(Mapper[Stadium], Stadium), stadium_data)
 
 session.commit()
 

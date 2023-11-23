@@ -1,14 +1,14 @@
 import os
-from typing import Generic, TypeVar
+from typing import Any, Callable, Type
 
 import sqlalchemy.dialects.mysql as mysql
-
-from metaboatrace.orm.database import Base, Session
-
-T = TypeVar("T", bound=Base)
+from sqlalchemy.ext.declarative import DeclarativeMeta
+from sqlalchemy.orm import Session as SQLAlchemySession
 
 
-def create_upsert_strategy():
+def create_upsert_strategy() -> (
+    Callable[[SQLAlchemySession, Type[DeclarativeMeta], list[dict[str, Any]], list[str]], bool]
+):
     if os.environ.get("DB", "mysql") == "mysql":
         return _mysql_upsert_strategy
     else:
@@ -16,7 +16,10 @@ def create_upsert_strategy():
 
 
 def _mysql_upsert_strategy(
-    session: Session, model: Generic[T], values: list[dict], on_duplicate_key_update: list[str]
+    session: SQLAlchemySession,
+    model: Type[DeclarativeMeta],
+    values: list[dict[str, Any]],
+    on_duplicate_key_update: list[str],
 ) -> bool:
     upsert_statement = mysql.insert(model).values(values)
 
