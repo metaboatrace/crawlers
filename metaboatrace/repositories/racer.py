@@ -19,28 +19,28 @@ class RacerRepository(Repository[RacerEntity]):
         session = Session()
 
         try:
-            orm_racer = (
+            racer_orm = (
                 session.query(RacerOrm)
                 .filter_by(registration_number=entity.registration_number)
                 .first()
             )
-            if orm_racer is None:
-                orm_racer = RacerOrm()
-                session.add(orm_racer)
+            if racer_orm is None:
+                racer_orm = RacerOrm()
+                session.add(racer_orm)
 
-            orm_racer.registration_number = entity.registration_number
-            orm_racer.last_name = entity.last_name
-            orm_racer.first_name = entity.first_name
-            if orm_racer.gender is None:
-                orm_racer.gender = entity.gender.value if entity.gender else None
-            orm_racer.term = entity.term
-            orm_racer.birth_date = entity.birth_date
-            orm_racer.branch_id = entity.branch.value if entity.branch else None
-            orm_racer.birth_prefecture_id = (
+            racer_orm.registration_number = entity.registration_number
+            racer_orm.last_name = entity.last_name
+            racer_orm.first_name = entity.first_name
+            if racer_orm.gender is None:
+                racer_orm.gender = entity.gender.value if entity.gender else None
+            racer_orm.term = entity.term
+            racer_orm.birth_date = entity.birth_date
+            racer_orm.branch_id = entity.branch.value if entity.branch else None
+            racer_orm.birth_prefecture_id = (
                 entity.born_prefecture.value if entity.born_prefecture else None
             )
-            orm_racer.height = entity.height
-            orm_racer.status = RacerStatus.active.value
+            racer_orm.height = entity.height
+            racer_orm.status = RacerStatus.active.value
 
             session.commit()
         except Exception as e:

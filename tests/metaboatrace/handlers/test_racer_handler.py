@@ -4,14 +4,12 @@ from unittest.mock import MagicMock, patch
 import pytest
 from metaboatrace.scrapers.official.website.exceptions import DataNotFound
 
-from metaboatrace.handlers.racer_handler import Event, crawl_racer_profile_handler
+from metaboatrace.handlers.racer import Event, crawl_racer_profile_handler
 
 
 @pytest.fixture
 def mock_crawl_racer_from_racer_profile_page():  # type: ignore
-    with patch(
-        "metaboatrace.handlers.racer_handler.crawl_racer_from_racer_profile_page"
-    ) as mock_func:
+    with patch("metaboatrace.handlers.racer.crawl_racer_from_racer_profile_page") as mock_func:
         yield mock_func
 
 
