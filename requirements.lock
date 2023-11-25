@@ -14,7 +14,7 @@ cffi==1.16.0
 charset-normalizer==3.2.0
 cryptography==41.0.5
 idna==3.4
-metaboatrace-models==1.0.1
+metaboatrace-models==1.1.1
 metaboatrace-scrapers==2.1.0
 numpy==1.25.2
 pycparser==2.21
