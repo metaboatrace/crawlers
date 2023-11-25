@@ -1,7 +1,7 @@
 from datetime import date
 
 from metaboatrace.models.racer import Racer
-from metaboatrace.models.stadium import Event, StadiumTelCode
+from metaboatrace.models.stadium import Event, MotorRenewal, StadiumTelCode
 from metaboatrace.scrapers.official.website.v1707.pages.monthly_schedule_page.location import (
     create_monthly_schedule_page_url,
 )
@@ -12,11 +12,12 @@ from metaboatrace.scrapers.official.website.v1707.pages.pre_inspection_informati
     create_event_entry_page_url,
 )
 from metaboatrace.scrapers.official.website.v1707.pages.pre_inspection_information_page.scraping import (
+    extract_event_entries,
     extract_racers,
 )
 
 from metaboatrace.crawlers.utils import fetch_html_as_io
-from metaboatrace.repositories import EventRepository, RacerRepository
+from metaboatrace.repositories import EventRepository, MotorRenewalRepository, RacerRepository
 
 
 def crawl_events_from_monthly_schedule_page(
@@ -33,5 +34,14 @@ def crawl_pre_inspection_information_page(
 ) -> None:
     url = create_event_entry_page_url(StadiumTelCode(stadium_tel_code), date)
     html_io = fetch_html_as_io(url)
+
     racers: list[Racer] = extract_racers(html_io)
     racer_repository.create_or_update_many(racers)
+
+    html_io.seek(0)
+    event_entries = extract_event_entries(html_io)
+    if all([ee.quinella_rate_of_motor == 0 for ee in event_entries]):
+        motor_renewal_repository = MotorRenewalRepository()
+        motor_renewal_repository.create_or_update(
+            MotorRenewal(stadium_tel_code=stadium_tel_code, date=date)
+        )

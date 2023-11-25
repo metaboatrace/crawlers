@@ -66,15 +66,6 @@ class MotorMaintenance(Base):
     updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 
-class MotorRenewal(Base):
-    __tablename__ = "motor_renewals"
-
-    stadium_tel_code = Column(Integer, ForeignKey("stadiums.tel_code"), primary_key=True)
-    date = Column(Date, primary_key=True)
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
-    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
-
-
 class Odds(Base):
     __tablename__ = "odds"
 

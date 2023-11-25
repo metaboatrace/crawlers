@@ -6,7 +6,7 @@ from sqlalchemy.orm import declarative_base, scoped_session, sessionmaker
 engine = create_engine(
     os.environ.get(
         "DATABASE_URL",
-        "mysql+pymysql://root:password@127.0.0.1:33306/metaboatrace?charset=utf8mb4",
+        "mysql+pymysql://root:password@127.0.0.1:33306/metaboatrace_dev?charset=utf8mb4",
     )
 )
 

@@ -1,2 +1,2 @@
-from .racer import RacerRepository
-from .stadium import EventRepository
+from .racer import *
+from .stadium import *

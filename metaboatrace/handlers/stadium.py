@@ -51,5 +51,4 @@ def crawl_pre_inspection_information_handler(
         crawl_pre_inspection_information_page(stadium_tel_code, date_obj)
         return {"success": True}
     except Exception as e:
-        breakpoint()
         return {"success": False, "errorCode": "UNKNOWN_ERROR", "errorMessage": f"{e}"}
