@@ -13,7 +13,9 @@ class EventRepository(Repository[EventEntity]):
     def create_or_update(self, entity: EventEntity) -> bool:
         raise NotImplementedError
 
-    def create_or_update_many(self, data: list[EventEntity]) -> bool:
+    def create_or_update_many(
+        self, data: list[EventEntity], on_duplicate_key_update: list[str] = ["grade", "kind"]
+    ) -> bool:
         values = [
             {
                 "stadium_tel_code": e.stadium_tel_code.value,
@@ -32,7 +34,7 @@ class EventRepository(Repository[EventEntity]):
             session,
             EventOrm,
             values,
-            ["grade", "kind"],
+            on_duplicate_key_update,
         )
 
 
@@ -62,5 +64,7 @@ class MotorRenewalRepository(Repository[MotorRenewalOrm]):
         finally:
             session.close()
 
-    def create_or_update_many(self, data: list[EventEntity]) -> bool:
+    def create_or_update_many(
+        self, data: list[EventEntity], on_duplicate_key_update: list[str]
+    ) -> bool:
         raise NotImplementedError

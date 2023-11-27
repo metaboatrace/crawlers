@@ -51,7 +51,9 @@ class RacerRepository(Repository[RacerEntity]):
 
         return True
 
-    def create_or_update_many(self, data: list[RacerEntity]) -> bool:
+    def create_or_update_many(
+        self, data: list[RacerEntity], on_duplicate_key_update: list[str] = ["gender"]
+    ) -> bool:
         values = [
             {
                 "registration_number": racer.registration_number,
@@ -72,4 +74,4 @@ class RacerRepository(Repository[RacerEntity]):
         upsert_strategy = create_upsert_strategy()
         session = Session()
 
-        return upsert_strategy(session, RacerOrm, values, ["gender"])
+        return upsert_strategy(session, RacerOrm, values, on_duplicate_key_update)

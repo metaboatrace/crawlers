@@ -26,9 +26,22 @@ def _transform_race_entity(entity: RaceEntity) -> dict[str, Any]:
 
 class RaceRepository(Repository[RaceEntity]):
     def create_or_update(self, entity: RaceEntity) -> bool:
-        return self.create_or_update_many([entity])
+        return self.create_or_update_many(
+            [entity],
+            ["title", "course_fixed", "number_of_laps", "use_stabilizer", "betting_deadline_at"],
+        )
 
-    def create_or_update_many(self, data: list[RaceEntity]) -> bool:
+    def create_or_update_many(
+        self,
+        data: list[RaceEntity],
+        on_duplicate_key_update: list[str] = [
+            "title",
+            "course_fixed",
+            "number_of_laps",
+            "use_stabilizer",
+            "betting_deadline_at",
+        ],
+    ) -> bool:
         values = [_transform_race_entity(entity) for entity in data]
 
         upsert_strategy = create_upsert_strategy()
@@ -54,9 +67,13 @@ def _transform_race_entry_entity(entity: RaceEntryEntity) -> dict[str, Any]:
 
 class RaceEntryRepository(Repository[RaceEntryEntity]):
     def create_or_update(self, entity: RaceEntryEntity) -> bool:
-        return self.create_or_update_many([entity])
+        return self.create_or_update_many([entity], ["racer_registration_number"])
 
-    def create_or_update_many(self, data: list[RaceEntryEntity]) -> bool:
+    def create_or_update_many(
+        self,
+        data: list[RaceEntryEntity],
+        on_duplicate_key_update: list[str] = ["racer_registration_number"],
+    ) -> bool:
         values = [_transform_race_entry_entity(entity) for entity in data]
 
         upsert_strategy = create_upsert_strategy()
@@ -66,5 +83,5 @@ class RaceEntryRepository(Repository[RaceEntryEntity]):
             session,
             RaceEntryOrm,
             values,
-            ["racer_registration_number"],
+            on_duplicate_key_update,
         )
