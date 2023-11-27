@@ -4,7 +4,6 @@ from typing import Any, Dict, TypedDict, Union
 from metaboatrace.scrapers.official.website.exceptions import DataNotFound
 
 from metaboatrace.crawlers.race import crawl_race_information_page
-from metaboatrace.repositories import RaceRepository
 
 
 class RaceHandlerEvent(TypedDict, total=False):
@@ -30,7 +29,7 @@ def crawl_race_information_handler(
     date_obj = datetime.strptime(date_str, "%Y-%m-%d").date()
 
     try:
-        crawl_race_information_page(stadium_tel_code, date_obj, race_number, RaceRepository())
+        crawl_race_information_page(stadium_tel_code, date_obj, race_number)
         return {"success": True}
     except DataNotFound as e:
         return {"success": False, "errorCode": "RACER_NOT_FOUND"}
