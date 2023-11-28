@@ -15,21 +15,27 @@ class RaceHandlerEvent(TypedDict, total=False):
     race_number: int
 
 
-def crawl_race_information_handler(
-    event: RaceHandlerEvent, context: Any
-) -> Dict[str, Union[bool, str]]:
+def extract_parameters_from_event(event: RaceHandlerEvent) -> tuple[int, datetime.date, int]:
     stadium_tel_code = event.get("stadium_tel_code")
     if stadium_tel_code is None:
         raise ValueError("stadium_tel_code is missing in the event parameter")
+
     date_str = event.get("date")
     if date_str is None:
         raise ValueError("date is missing in the event parameter")
+    date_obj = datetime.strptime(date_str, "%Y-%m-%d").date()
+
     race_number = event.get("race_number")
     if race_number is None:
         raise ValueError("race_number is missing in the event parameter")
-    race_number = int(race_number)
 
-    date_obj = datetime.strptime(date_str, "%Y-%m-%d").date()
+    return stadium_tel_code, date_obj, int(race_number)
+
+
+def crawl_race_information_handler(
+    event: RaceHandlerEvent, context: Any
+) -> Dict[str, Union[bool, str]]:
+    stadium_tel_code, date_obj, race_number = extract_parameters_from_event(event)
 
     try:
         crawl_race_information_page(stadium_tel_code, date_obj, race_number)
@@ -41,18 +47,7 @@ def crawl_race_information_handler(
 def crawl_race_before_information_handler(
     event: RaceHandlerEvent, context: Any
 ) -> Dict[str, Union[bool, str]]:
-    stadium_tel_code = event.get("stadium_tel_code")
-    if stadium_tel_code is None:
-        raise ValueError("stadium_tel_code is missing in the event parameter")
-    date_str = event.get("date")
-    if date_str is None:
-        raise ValueError("date is missing in the event parameter")
-    race_number = event.get("race_number")
-    if race_number is None:
-        raise ValueError("race_number is missing in the event parameter")
-    race_number = int(race_number)
-
-    date_obj = datetime.strptime(date_str, "%Y-%m-%d").date()
+    stadium_tel_code, date_obj, race_number = extract_parameters_from_event(event)
 
     try:
         crawl_race_before_information_page(stadium_tel_code, date_obj, race_number)
