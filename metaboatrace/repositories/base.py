@@ -10,5 +10,5 @@ class Repository(Generic[T], metaclass=ABCMeta):
         raise NotImplementedError
 
     @abstractmethod
-    def create_or_update_many(self, data: list[T]) -> bool:
+    def create_or_update_many(self, data: list[T], on_duplicate_key_update: list[str]) -> bool:
         raise NotImplementedError

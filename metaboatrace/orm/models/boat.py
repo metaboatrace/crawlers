@@ -14,8 +14,8 @@ class BoatSetting(Base):
     pit_number = Column(Integer, primary_key=True)
     boat_number = Column(Integer, nullable=False)
     motor_number = Column(Integer, nullable=False)
-    tilt = Column(Float, nullable=False)
-    propeller_renewed = Column(Boolean, nullable=False)
+    tilt = Column(Float, nullable=True)
+    propeller_renewed = Column(Boolean, nullable=True)
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
     updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
 
