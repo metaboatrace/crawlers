@@ -2,6 +2,12 @@ from datetime import date
 
 from metaboatrace.models.race import BoatSetting
 from metaboatrace.models.stadium import StadiumTelCode
+from metaboatrace.scrapers.official.website.v1707.pages.race.before_information_page.location import (
+    create_race_before_information_page_url,
+)
+from metaboatrace.scrapers.official.website.v1707.pages.race.before_information_page.scraping import (
+    extract_start_exhibition_records,
+)
 from metaboatrace.scrapers.official.website.v1707.pages.race.entry_page.location import (
     create_race_entry_page_url,
 )
@@ -19,6 +25,7 @@ from metaboatrace.repositories import (
     MotorBettingContributeRateAggregationRepository,
     RaceEntryRepository,
     RaceRepository,
+    StartExhibitionRecordRepository,
 )
 
 
@@ -64,3 +71,13 @@ def crawl_race_information_page(stadium_tel_code: int, date: date, race_number: 
         MotorBettingContributeRateAggregationRepository()
     )
     motor_betting_contribute_rate_aggregation_repository.create_or_update_many(motor_performances)
+
+
+def crawl_race_before_information_page(stadium_tel_code: int, date: date, race_number: int) -> None:
+    url = create_race_before_information_page_url(
+        date, StadiumTelCode(stadium_tel_code), race_number
+    )
+    html_io = fetch_html_as_io(url)
+    start_exhibition_records = extract_start_exhibition_records(html_io)
+    start_exhibition_record_repository = StartExhibitionRecordRepository()
+    start_exhibition_record_repository.create_or_update_many(start_exhibition_records)
