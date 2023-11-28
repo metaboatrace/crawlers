@@ -1,9 +1,14 @@
 from typing import Any
 
+from metaboatrace.models.boat import BoatPerformance
+
 # hack: こっちのリポジトリでは boat モジュールに置いてるので統一したい
 from metaboatrace.models.race import BoatSetting as BoatSettingEntity
 
 from metaboatrace.orm.database import Session
+from metaboatrace.orm.models.boat import (
+    BoatBettingContributeRateAggregation as BoatBettingContributeRateAggregationOrm,
+)
 from metaboatrace.orm.models.boat import BoatSetting as BoatSettingOrm
 from metaboatrace.orm.strategies.upsert import create_upsert_strategy
 
@@ -38,6 +43,38 @@ class BoatSettingRepository(Repository[BoatSettingEntity]):
         return upsert_strategy(
             session,
             BoatSettingOrm,
+            values,
+            on_duplicate_key_update,
+        )
+
+
+def _transform_boat_performance_entity(entity: BoatPerformance) -> dict[str, Any]:
+    return {
+        "stadium_tel_code": entity.stadium_tel_code.value,
+        "boat_number": entity.number,
+        "aggregated_on": entity.recorded_date,
+        "quinella_rate": entity.quinella_rate,
+        "trio_rate": entity.trio_rate,
+    }
+
+
+class BoatBettingContributeRateAggregationRepository(Repository[BoatPerformance]):
+    def create_or_update(self, entity: BoatSettingEntity) -> bool:
+        return self.create_or_update_many([entity], ["quinella_rate", "trio_rate"])
+
+    def create_or_update_many(
+        self,
+        data: list[BoatSettingEntity],
+        on_duplicate_key_update: list[str] = ["quinella_rate", "trio_rate"],
+    ) -> bool:
+        values = [_transform_boat_performance_entity(entity) for entity in data]
+
+        upsert_strategy = create_upsert_strategy()
+        session = Session()
+
+        return upsert_strategy(
+            session,
+            BoatBettingContributeRateAggregationOrm,
             values,
             on_duplicate_key_update,
         )
