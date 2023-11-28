@@ -7,6 +7,7 @@ from metaboatrace.scrapers.official.website.v1707.pages.race.entry_page.location
 )
 from metaboatrace.scrapers.official.website.v1707.pages.race.entry_page.scraping import (
     extract_boat_performances,
+    extract_motor_performances,
     extract_race_entries,
     extract_race_information,
 )
@@ -15,6 +16,7 @@ from metaboatrace.crawlers.utils import fetch_html_as_io
 from metaboatrace.repositories import (
     BoatBettingContributeRateAggregationRepository,
     BoatSettingRepository,
+    MotorBettingContributeRateAggregationRepository,
     RaceEntryRepository,
     RaceRepository,
 )
@@ -55,3 +57,10 @@ def crawl_race_information_page(stadium_tel_code: int, date: date, race_number: 
         BoatBettingContributeRateAggregationRepository()
     )
     boat_betting_contribute_rate_aggregation_repository.create_or_update_many(boat_performances)
+
+    html_io.seek(0)
+    motor_performances = extract_motor_performances(html_io)
+    motor_betting_contribute_rate_aggregation_repository = (
+        MotorBettingContributeRateAggregationRepository()
+    )
+    motor_betting_contribute_rate_aggregation_repository.create_or_update_many(motor_performances)
