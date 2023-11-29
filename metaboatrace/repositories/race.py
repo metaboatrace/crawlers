@@ -95,7 +95,9 @@ class RaceEntryRepository(Repository[RaceEntryEntity]):
         )
 
 
-def _transform_start_exhibition_entity(entity: StartExhibitionRecordEntity) -> dict[str, Any]:
+def _transform_start_exhibition_record_entity(
+    entity: StartExhibitionRecordEntity,
+) -> dict[str, Any]:
     return {
         "stadium_tel_code": entity.stadium_tel_code.value,
         "date": entity.race_holding_date,
@@ -115,7 +117,7 @@ class StartExhibitionRecordRepository(Repository[StartExhibitionRecordEntity]):
         data: list[StartExhibitionRecordEntity],
         on_duplicate_key_update: list[str] = ["course_number", "start_time"],
     ) -> bool:
-        values = [_transform_start_exhibition_entity(entity) for entity in data]
+        values = [_transform_start_exhibition_record_entity(entity) for entity in data]
 
         upsert_strategy = create_upsert_strategy()
         session = Session()
@@ -128,7 +130,7 @@ class StartExhibitionRecordRepository(Repository[StartExhibitionRecordEntity]):
         )
 
 
-def _transform_circumference_exhibition_entity(
+def _transform_circumference_exhibition_record_entity(
     entity: CircumferenceExhibitionRecordEntity,
 ) -> dict[str, Any]:
     return {
@@ -149,7 +151,7 @@ class CircumferenceExhibitionRecordRepository(Repository[CircumferenceExhibition
         data: list[CircumferenceExhibitionRecordEntity],
         on_duplicate_key_update: list[str] = ["exhibition_time"],
     ) -> bool:
-        values = [_transform_circumference_exhibition_entity(entity) for entity in data]
+        values = [_transform_circumference_exhibition_record_entity(entity) for entity in data]
 
         upsert_strategy = create_upsert_strategy()
         session = Session()
