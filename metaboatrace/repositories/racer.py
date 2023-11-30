@@ -1,9 +1,12 @@
 from enum import Enum
+from typing import Any
 
 from metaboatrace.models.racer import Racer as RacerEntity
+from metaboatrace.models.racer import RacerCondition as RacerConditionEntity
 
 from metaboatrace.orm.database import Session
 from metaboatrace.orm.models.racer import Racer as RacerOrm
+from metaboatrace.orm.models.racer import RacerCondition as RacerConditionOrm
 from metaboatrace.orm.strategies.upsert import create_upsert_strategy
 
 from .base import Repository
@@ -75,3 +78,36 @@ class RacerRepository(Repository[RacerEntity]):
         session = Session()
 
         return upsert_strategy(session, RacerOrm, values, on_duplicate_key_update)
+
+
+def _transform_racer_condition_entity(
+    entity: RacerConditionEntity,
+) -> dict[str, Any]:
+    return {
+        "racer_registration_number": entity.racer_registration_number,
+        "date": entity.recorded_on,
+        "weight": entity.weight,
+        "adjust": entity.adjust,
+    }
+
+
+class RacerConditionRepository(Repository[RacerConditionEntity]):
+    def create_or_update(self, entity: RacerConditionEntity) -> bool:
+        return self.create_or_update_many([entity], ["weight", "adjust"])
+
+    def create_or_update_many(
+        self,
+        data: list[RacerConditionEntity],
+        on_duplicate_key_update: list[str] = ["weight", "adjust"],
+    ) -> bool:
+        values = [_transform_racer_condition_entity(entity) for entity in data]
+
+        upsert_strategy = create_upsert_strategy()
+        session = Session()
+
+        return upsert_strategy(
+            session,
+            RacerConditionOrm,
+            values,
+            on_duplicate_key_update,
+        )

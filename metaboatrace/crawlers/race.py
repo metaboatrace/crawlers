@@ -7,6 +7,7 @@ from metaboatrace.scrapers.official.website.v1707.pages.race.before_information_
 )
 from metaboatrace.scrapers.official.website.v1707.pages.race.before_information_page.scraping import (
     extract_circumference_exhibition_records,
+    extract_racer_conditions,
     extract_start_exhibition_records,
 )
 from metaboatrace.scrapers.official.website.v1707.pages.race.entry_page.location import (
@@ -26,6 +27,7 @@ from metaboatrace.repositories import (
     CircumferenceExhibitionRecordRepository,
     MotorBettingContributeRateAggregationRepository,
     RaceEntryRepository,
+    RacerConditionRepository,
     RaceRepository,
     StartExhibitionRecordRepository,
 )
@@ -90,3 +92,8 @@ def crawl_race_before_information_page(stadium_tel_code: int, date: date, race_n
     circumference_exhibition_record_repository.create_or_update_many(
         circumference_exhibition_records
     )
+
+    html_io.seek(0)
+    racer_conditions = extract_racer_conditions(html_io)
+    racer_condition_repository = RacerConditionRepository()
+    racer_condition_repository.create_or_update_many(racer_conditions)
