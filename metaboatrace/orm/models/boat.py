@@ -67,35 +67,3 @@ class MotorMaintenance(Base):
     quantity = Column(Integer, nullable=False)
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
     updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
-
-
-class Odds(Base):
-    __tablename__ = "odds"
-
-    stadium_tel_code = Column(Integer, ForeignKey("stadiums.tel_code"), primary_key=True)
-    date = Column(Date, primary_key=True)
-    race_number = Column(Integer, primary_key=True)
-    betting_method = Column(Integer, primary_key=True)
-    betting_number = Column(Integer, primary_key=True)
-    ratio = Column(Float, nullable=False)
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
-    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
-
-
-# NOTE:
-#
-# Odds モデルと構造が似通っているので統一できると設計初期段階では考えていた
-# （このテーブルで持ちたいのは払戻し金額だから、odds に当選カラムみたいなの作るか正規化するならhas_one関連でテーブル先にひとつ作るかすればいいと考えていた）
-# ただし、ドメインロジック上払戻金は必ずしもオッズの比率と一致するとは言えないため、このようなテーブルで別途保持する必要があると考えた
-# 例えば、艇番123、三連単オッズ10倍 で決まったレースでも4号艇がフライングしてたら返還が発生するので、購入時のオッズである10倍（¥1,000）の払戻しではなくなる
-class Payoff(Base):
-    __tablename__ = "payoffs"
-
-    stadium_tel_code = Column(Integer, ForeignKey("stadiums.tel_code"), primary_key=True)
-    date = Column(Date, primary_key=True)
-    race_number = Column(Integer, primary_key=True)
-    betting_method = Column(Integer, primary_key=True)
-    betting_number = Column(Integer, primary_key=True)
-    amount = Column(Integer, nullable=False)
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
-    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
