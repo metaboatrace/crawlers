@@ -88,7 +88,6 @@ class RaceRecord(Base):
     pit_number = Column(Integer, primary_key=True)
     course_number = Column(Integer, nullable=False)
     start_time = Column(Float)
-    start_order = Column(Integer)
     race_time = Column(Float)
     arrival = Column(Integer)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
