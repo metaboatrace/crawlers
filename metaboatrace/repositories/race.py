@@ -3,6 +3,7 @@ from typing import Any
 from metaboatrace.models.race import (
     CircumferenceExhibitionRecord as CircumferenceExhibitionRecordEntity,
 )
+from metaboatrace.models.race import Odds as OddsEntity
 from metaboatrace.models.race import RaceEntry as RaceEntryEntity
 from metaboatrace.models.race import RaceInformation as RaceEntity
 from metaboatrace.models.race import StartExhibitionRecord as StartExhibitionRecordEntity
@@ -11,6 +12,7 @@ from metaboatrace.orm.database import Session
 from metaboatrace.orm.models.race import (
     CircumferenceExhibitionRecord as CircumferenceExhibitionRecordOrm,
 )
+from metaboatrace.orm.models.race import Odds as OddsOrm
 from metaboatrace.orm.models.race import Race as RaceOrm
 from metaboatrace.orm.models.race import RaceEntry as RaceEntryOrm
 from metaboatrace.orm.models.race import StartExhibitionRecord as StartExhibitionRecordOrm
@@ -159,6 +161,43 @@ class CircumferenceExhibitionRecordRepository(Repository[CircumferenceExhibition
         return upsert_strategy(
             session,
             CircumferenceExhibitionRecordOrm,
+            values,
+            on_duplicate_key_update,
+        )
+
+
+def _transform_odds_entity(
+    entity: OddsEntity,
+) -> dict[str, Any]:
+    betting_number = int("".join(map(str, entity.betting_numbers)))
+
+    return {
+        "stadium_tel_code": entity.stadium_tel_code.value,
+        "date": entity.race_holding_date,
+        "race_number": entity.race_number,
+        "betting_method": entity.betting_method.value,
+        "betting_number": betting_number,
+        "ratio": entity.ratio,
+    }
+
+
+class OddsRepository(Repository[OddsEntity]):
+    def create_or_update(self, entity: OddsEntity) -> bool:
+        return self.create_or_update_many([entity], ["ratio"])
+
+    def create_or_update_many(
+        self,
+        data: list[OddsEntity],
+        on_duplicate_key_update: list[str] = ["ratio"],
+    ) -> bool:
+        values = [_transform_odds_entity(entity) for entity in data]
+
+        upsert_strategy = create_upsert_strategy()
+        session = Session()
+
+        return upsert_strategy(
+            session,
+            OddsOrm,
             values,
             on_duplicate_key_update,
         )

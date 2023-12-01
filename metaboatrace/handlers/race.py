@@ -6,6 +6,7 @@ from metaboatrace.scrapers.official.website.exceptions import DataNotFound
 from metaboatrace.crawlers.race import (
     crawl_race_before_information_page,
     crawl_race_information_page,
+    crawl_trifecta_odds_page,
 )
 
 
@@ -53,4 +54,15 @@ def crawl_race_before_information_handler(
         crawl_race_before_information_page(stadium_tel_code, date_obj, race_number)
         return {"success": True}
     except DataNotFound as e:
+        return {"success": False, "errorCode": "RACER_NOT_FOUND"}
+
+
+def crawl_odds_handler(event: RaceHandlerEvent, context: Any) -> Dict[str, Union[bool, str]]:
+    stadium_tel_code, date_obj, race_number = extract_parameters_from_event(event)
+
+    try:
+        crawl_trifecta_odds_page(stadium_tel_code, date_obj, race_number)
+        return {"success": True}
+    except DataNotFound as e:
+        # TODO: ここではレース中止系の例外を拾うのが正解（他のハンドラでも同様）
         return {"success": False, "errorCode": "RACER_NOT_FOUND"}
