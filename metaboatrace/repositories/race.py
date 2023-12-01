@@ -14,6 +14,7 @@ from metaboatrace.orm.database import Session
 from metaboatrace.orm.models.race import (
     CircumferenceExhibitionRecord as CircumferenceExhibitionRecordOrm,
 )
+from metaboatrace.orm.models.race import DisqualifiedRaceEntry as DisqualifiedRaceEntryOrm
 from metaboatrace.orm.models.race import Odds as OddsOrm
 from metaboatrace.orm.models.race import Payoff as PayoffOrm
 from metaboatrace.orm.models.race import Race as RaceOrm
@@ -320,6 +321,44 @@ class WinningRaceEntryRepository(Repository[RaceRecordEntity]):
         return upsert_strategy(
             session,
             WinningRaceEntryOrm,
+            values,
+            on_duplicate_key_update,
+        )
+
+
+def _transform_race_record_entity_to_disqualified_race_entry(
+    entity: RaceRecordEntity,
+) -> dict[str, Any]:
+    return {
+        "stadium_tel_code": entity.stadium_tel_code.value,
+        "date": entity.race_holding_date,
+        "race_number": entity.race_number,
+        "pit_number": entity.pit_number,
+        "disqualification": entity.disqualification.value,
+    }
+
+
+class DisqualifiedRaceEntryRepository(Repository[RaceRecordEntity]):
+    def create_or_update(self, entity: RaceRecordEntity) -> bool:
+        return self.create_or_update_many([entity], ["disqualification"])
+
+    def create_or_update_many(
+        self,
+        data: list[RaceRecordEntity],
+        on_duplicate_key_update: list[str] = [
+            "disqualification",
+        ],
+    ) -> bool:
+        values = [
+            _transform_race_record_entity_to_disqualified_race_entry(entity) for entity in data
+        ]
+
+        upsert_strategy = create_upsert_strategy()
+        session = Session()
+
+        return upsert_strategy(
+            session,
+            DisqualifiedRaceEntryOrm,
             values,
             on_duplicate_key_update,
         )

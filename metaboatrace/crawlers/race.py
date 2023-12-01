@@ -43,6 +43,7 @@ from metaboatrace.repositories import (
     BoatBettingContributeRateAggregationRepository,
     BoatSettingRepository,
     CircumferenceExhibitionRecordRepository,
+    DisqualifiedRaceEntryRepository,
     MotorBettingContributeRateAggregationRepository,
     OddsRepository,
     PayoffRepository,
@@ -159,4 +160,8 @@ def crawl_race_result_page(stadium_tel_code: int, date: date, race_number: int) 
     winning_race_entry_repository = WinningRaceEntryRepository()
     winning_race_entry_repository.create_or_update_many(
         [r for r in race_records if r.winning_trick is not None]
+    )
+    disqualified_race_entry_repository = DisqualifiedRaceEntryRepository()
+    disqualified_race_entry_repository.create_or_update_many(
+        [r for r in race_records if r.disqualification is not None]
     )
