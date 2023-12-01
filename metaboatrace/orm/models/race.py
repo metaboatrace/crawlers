@@ -75,7 +75,6 @@ class CircumferenceExhibitionRecord(Base):
     race_number = Column(Integer, primary_key=True)
     pit_number = Column(Integer, primary_key=True)
     exhibition_time = Column(Float, nullable=False)
-    exhibition_time_order = Column(Integer, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, nullable=False, onupdate=datetime.utcnow)
 
