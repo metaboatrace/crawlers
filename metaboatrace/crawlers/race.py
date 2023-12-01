@@ -52,6 +52,7 @@ from metaboatrace.repositories import (
     RaceRepository,
     StartExhibitionRecordRepository,
     WeatherConditionRepository,
+    WinningRaceEntryRepository,
 )
 
 
@@ -155,3 +156,7 @@ def crawl_race_result_page(stadium_tel_code: int, date: date, race_number: int) 
     race_records = extract_race_records(html_io)
     race_record_repository = RaceRecordRepository()
     race_record_repository.create_or_update_many(race_records)
+    winning_race_entry_repository = WinningRaceEntryRepository()
+    winning_race_entry_repository.create_or_update_many(
+        [r for r in race_records if r.winning_trick is not None]
+    )

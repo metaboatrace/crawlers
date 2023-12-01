@@ -20,6 +20,7 @@ from metaboatrace.orm.models.race import Race as RaceOrm
 from metaboatrace.orm.models.race import RaceEntry as RaceEntryOrm
 from metaboatrace.orm.models.race import RaceRecord as RaceRecordOrm
 from metaboatrace.orm.models.race import StartExhibitionRecord as StartExhibitionRecordOrm
+from metaboatrace.orm.models.race import WinningRaceEntry as WinningRaceEntryOrm
 from metaboatrace.orm.strategies.upsert import create_upsert_strategy
 
 from .base import Repository
@@ -283,6 +284,42 @@ class RaceRecordRepository(Repository[RaceRecordEntity]):
         return upsert_strategy(
             session,
             RaceRecordOrm,
+            values,
+            on_duplicate_key_update,
+        )
+
+
+def _transform_race_record_entity_to_winning_race_entry(
+    entity: RaceRecordEntity,
+) -> dict[str, Any]:
+    return {
+        "stadium_tel_code": entity.stadium_tel_code.value,
+        "date": entity.race_holding_date,
+        "race_number": entity.race_number,
+        "pit_number": entity.pit_number,
+        "winning_trick": entity.winning_trick.value,
+    }
+
+
+class WinningRaceEntryRepository(Repository[RaceRecordEntity]):
+    def create_or_update(self, entity: RaceRecordEntity) -> bool:
+        return self.create_or_update_many([entity], ["winning_trick"])
+
+    def create_or_update_many(
+        self,
+        data: list[RaceRecordEntity],
+        on_duplicate_key_update: list[str] = [
+            "winning_trick",
+        ],
+    ) -> bool:
+        values = [_transform_race_record_entity_to_winning_race_entry(entity) for entity in data]
+
+        upsert_strategy = create_upsert_strategy()
+        session = Session()
+
+        return upsert_strategy(
+            session,
+            WinningRaceEntryOrm,
             values,
             on_duplicate_key_update,
         )
