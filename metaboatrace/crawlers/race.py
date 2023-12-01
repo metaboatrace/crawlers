@@ -21,6 +21,12 @@ from metaboatrace.scrapers.official.website.v1707.pages.race.entry_page.scraping
     extract_race_entries,
     extract_race_information,
 )
+from metaboatrace.scrapers.official.website.v1707.pages.race.odds.trifecta_page.location import (
+    create_odds_page_url,
+)
+from metaboatrace.scrapers.official.website.v1707.pages.race.odds.trifecta_page.scraping import (
+    extract_odds,
+)
 
 from metaboatrace.crawlers.utils import fetch_html_as_io
 from metaboatrace.repositories import (
@@ -28,6 +34,7 @@ from metaboatrace.repositories import (
     BoatSettingRepository,
     CircumferenceExhibitionRecordRepository,
     MotorBettingContributeRateAggregationRepository,
+    OddsRepository,
     RaceEntryRepository,
     RacerConditionRepository,
     RaceRepository,
@@ -110,3 +117,11 @@ def crawl_race_before_information_page(stadium_tel_code: int, date: date, race_n
     weather_condition = extract_weather_condition(html_io)
     weather_condition_repository = WeatherConditionRepository()
     weather_condition_repository.create_or_update(weather_condition)
+
+
+def crawl_trifecta_odds_page(stadium_tel_code: int, date: date, race_number: int) -> None:
+    url = create_odds_page_url(date, StadiumTelCode(stadium_tel_code), race_number)
+    html_io = fetch_html_as_io(url)
+    odds = extract_odds(html_io)
+    odds_repository = OddsRepository()
+    odds_repository.create_or_update_many(odds)
