@@ -33,8 +33,8 @@ def _transform_race_entity(entity: RaceEntity) -> dict[str, Any]:
         "date": entity.race_holding_date,
         "race_number": entity.race_number,
         "title": entity.title,
-        "course_fixed": entity.is_course_fixed,
-        "use_stabilizer": entity.use_stabilizer,
+        "is_course_fixed": entity.is_course_fixed,
+        "is_stabilizer_used": entity.use_stabilizer,
         "number_of_laps": entity.number_of_laps,
         "betting_deadline_at": entity.deadline_at,
     }
@@ -44,7 +44,13 @@ class RaceRepository(Repository[RaceEntity]):
     def create_or_update(self, entity: RaceEntity) -> bool:
         return self.create_or_update_many(
             [entity],
-            ["title", "course_fixed", "number_of_laps", "use_stabilizer", "betting_deadline_at"],
+            [
+                "title",
+                "is_course_fixed",
+                "number_of_laps",
+                "is_stabilizer_used",
+                "betting_deadline_at",
+            ],
         )
 
     def create_or_update_many(
@@ -52,9 +58,9 @@ class RaceRepository(Repository[RaceEntity]):
         data: list[RaceEntity],
         on_duplicate_key_update: list[str] = [
             "title",
-            "course_fixed",
+            "is_course_fixed",
             "number_of_laps",
-            "use_stabilizer",
+            "is_stabilizer_used",
             "betting_deadline_at",
         ],
     ) -> bool:
@@ -67,7 +73,7 @@ class RaceRepository(Repository[RaceEntity]):
             session,
             RaceOrm,
             values,
-            ["title", "course_fixed", "number_of_laps", "use_stabilizer", "betting_deadline_at"],
+            on_duplicate_key_update,
         )
 
 
