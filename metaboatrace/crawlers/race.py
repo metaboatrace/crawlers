@@ -27,6 +27,12 @@ from metaboatrace.scrapers.official.website.v1707.pages.race.odds.trifecta_page.
 from metaboatrace.scrapers.official.website.v1707.pages.race.odds.trifecta_page.scraping import (
     extract_odds,
 )
+from metaboatrace.scrapers.official.website.v1707.pages.race.result_page.location import (
+    create_race_result_page_url,
+)
+from metaboatrace.scrapers.official.website.v1707.pages.race.result_page.scraping import (
+    extract_race_payoffs,
+)
 
 from metaboatrace.crawlers.utils import fetch_html_as_io
 from metaboatrace.repositories import (
@@ -35,6 +41,7 @@ from metaboatrace.repositories import (
     CircumferenceExhibitionRecordRepository,
     MotorBettingContributeRateAggregationRepository,
     OddsRepository,
+    PayoffRepository,
     RaceEntryRepository,
     RacerConditionRepository,
     RaceRepository,
@@ -125,3 +132,11 @@ def crawl_trifecta_odds_page(stadium_tel_code: int, date: date, race_number: int
     odds = extract_odds(html_io)
     odds_repository = OddsRepository()
     odds_repository.create_or_update_many(odds)
+
+
+def crawl_race_result_page(stadium_tel_code: int, date: date, race_number: int) -> None:
+    url = create_race_result_page_url(date, StadiumTelCode(stadium_tel_code), race_number)
+    html_io = fetch_html_as_io(url)
+    payoffs = extract_race_payoffs(html_io)
+    payoff_repository = PayoffRepository()
+    payoff_repository.create_or_update_many(payoffs)
