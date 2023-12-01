@@ -32,6 +32,7 @@ from metaboatrace.scrapers.official.website.v1707.pages.race.result_page.locatio
 )
 from metaboatrace.scrapers.official.website.v1707.pages.race.result_page.scraping import (
     extract_race_payoffs,
+    extract_race_records,
 )
 from metaboatrace.scrapers.official.website.v1707.pages.race.result_page.scraping import (
     extract_weather_condition as extract_weather_condition_in_performance,
@@ -47,6 +48,7 @@ from metaboatrace.repositories import (
     PayoffRepository,
     RaceEntryRepository,
     RacerConditionRepository,
+    RaceRecordRepository,
     RaceRepository,
     StartExhibitionRecordRepository,
     WeatherConditionRepository,
@@ -148,3 +150,8 @@ def crawl_race_result_page(stadium_tel_code: int, date: date, race_number: int) 
     weather_condition = extract_weather_condition_in_performance(html_io)
     weather_condition_repository = WeatherConditionRepository()
     weather_condition_repository.create_or_update(weather_condition)
+
+    html_io = fetch_html_as_io(url)
+    race_records = extract_race_records(html_io)
+    race_record_repository = RaceRecordRepository()
+    race_record_repository.create_or_update_many(race_records)
