@@ -6,9 +6,11 @@ from metaboatrace.scrapers.official.website.v1707.pages.race.before_information_
     create_race_before_information_page_url,
 )
 from metaboatrace.scrapers.official.website.v1707.pages.race.before_information_page.scraping import (
+    extract_boat_settings,
     extract_circumference_exhibition_records,
     extract_racer_conditions,
     extract_start_exhibition_records,
+    extract_weather_condition,
 )
 from metaboatrace.scrapers.official.website.v1707.pages.race.entry_page.location import (
     create_race_entry_page_url,
@@ -30,6 +32,7 @@ from metaboatrace.repositories import (
     RacerConditionRepository,
     RaceRepository,
     StartExhibitionRecordRepository,
+    WeatherConditionRepository,
 )
 
 
@@ -97,3 +100,13 @@ def crawl_race_before_information_page(stadium_tel_code: int, date: date, race_n
     racer_conditions = extract_racer_conditions(html_io)
     racer_condition_repository = RacerConditionRepository()
     racer_condition_repository.create_or_update_many(racer_conditions)
+
+    html_io.seek(0)
+    boat_settings = extract_boat_settings(html_io)
+    boat_setting_repository = BoatSettingRepository()
+    boat_setting_repository.create_or_update_many(boat_settings, ["tilt", "propeller_renewed"])
+
+    html_io.seek(0)
+    weather_condition = extract_weather_condition(html_io)
+    weather_condition_repository = WeatherConditionRepository()
+    weather_condition_repository.create_or_update(weather_condition)
