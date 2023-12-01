@@ -27,7 +27,7 @@ def _transform_boat_setting_entity(entity: BoatSettingEntity) -> dict[str, Any]:
         "boat_number": entity.boat_number,
         "motor_number": entity.motor_number,
         "tilt": entity.tilt,
-        "propeller_renewed": entity.is_new_propeller,
+        "is_propeller_renewed": entity.is_new_propeller,
     }
 
 

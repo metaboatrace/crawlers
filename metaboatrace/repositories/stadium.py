@@ -82,7 +82,7 @@ def _transform_weather_condition_entity(
         "stadium_tel_code": entity.stadium_tel_code.value,
         "date": entity.race_holding_date,
         "race_number": entity.race_number,
-        "in_performance": entity.in_performance,
+        "is_in_performance": entity.in_performance,
         "weather": entity.weather.value,
         "wavelength": entity.wavelength,
         "wind_angle": entity.wind_angle,
