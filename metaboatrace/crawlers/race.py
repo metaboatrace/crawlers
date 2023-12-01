@@ -27,19 +27,33 @@ from metaboatrace.scrapers.official.website.v1707.pages.race.odds.trifecta_page.
 from metaboatrace.scrapers.official.website.v1707.pages.race.odds.trifecta_page.scraping import (
     extract_odds,
 )
+from metaboatrace.scrapers.official.website.v1707.pages.race.result_page.location import (
+    create_race_result_page_url,
+)
+from metaboatrace.scrapers.official.website.v1707.pages.race.result_page.scraping import (
+    extract_race_payoffs,
+    extract_race_records,
+)
+from metaboatrace.scrapers.official.website.v1707.pages.race.result_page.scraping import (
+    extract_weather_condition as extract_weather_condition_in_performance,
+)
 
 from metaboatrace.crawlers.utils import fetch_html_as_io
 from metaboatrace.repositories import (
     BoatBettingContributeRateAggregationRepository,
     BoatSettingRepository,
     CircumferenceExhibitionRecordRepository,
+    DisqualifiedRaceEntryRepository,
     MotorBettingContributeRateAggregationRepository,
     OddsRepository,
+    PayoffRepository,
     RaceEntryRepository,
     RacerConditionRepository,
+    RaceRecordRepository,
     RaceRepository,
     StartExhibitionRecordRepository,
     WeatherConditionRepository,
+    WinningRaceEntryRepository,
 )
 
 
@@ -125,3 +139,29 @@ def crawl_trifecta_odds_page(stadium_tel_code: int, date: date, race_number: int
     odds = extract_odds(html_io)
     odds_repository = OddsRepository()
     odds_repository.create_or_update_many(odds)
+
+
+def crawl_race_result_page(stadium_tel_code: int, date: date, race_number: int) -> None:
+    url = create_race_result_page_url(date, StadiumTelCode(stadium_tel_code), race_number)
+    html_io = fetch_html_as_io(url)
+    payoffs = extract_race_payoffs(html_io)
+    payoff_repository = PayoffRepository()
+    payoff_repository.create_or_update_many(payoffs)
+
+    html_io = fetch_html_as_io(url)
+    weather_condition = extract_weather_condition_in_performance(html_io)
+    weather_condition_repository = WeatherConditionRepository()
+    weather_condition_repository.create_or_update(weather_condition)
+
+    html_io = fetch_html_as_io(url)
+    race_records = extract_race_records(html_io)
+    race_record_repository = RaceRecordRepository()
+    race_record_repository.create_or_update_many(race_records)
+    winning_race_entry_repository = WinningRaceEntryRepository()
+    winning_race_entry_repository.create_or_update_many(
+        [r for r in race_records if r.winning_trick is not None]
+    )
+    disqualified_race_entry_repository = DisqualifiedRaceEntryRepository()
+    disqualified_race_entry_repository.create_or_update_many(
+        [r for r in race_records if r.disqualification is not None]
+    )
