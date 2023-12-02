@@ -1,3 +1,4 @@
+from datetime import date
 from typing import Any
 
 from metaboatrace.models.race import (
@@ -75,6 +76,37 @@ class RaceRepository(Repository[RaceEntity]):
             values,
             on_duplicate_key_update,
         )
+
+    def cancel(self, stadium_tel_code: int, date: date, race_number: int) -> bool:
+        session = Session()
+
+        try:
+            race_orm = (
+                session.query(RaceOrm)
+                .filter_by(stadium_tel_code=stadium_tel_code, date=date, race_number=race_number)
+                .first()
+            )
+
+            if not race_orm:
+                race_orm = RaceOrm(
+                    stadium_tel_code=stadium_tel_code,
+                    date=date,
+                    race_number=race_number,
+                    is_canceled=True,
+                )
+                session.add(race_orm)
+            else:
+                race_orm.is_canceled = True
+
+            session.commit()
+            return True
+
+        except Exception as e:
+            session.rollback()
+            raise e
+
+        finally:
+            session.close()
 
 
 def _transform_race_entry_entity(entity: RaceEntryEntity) -> dict[str, Any]:

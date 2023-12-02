@@ -79,6 +79,30 @@ class RacerRepository(Repository[RacerEntity]):
 
         return upsert_strategy(session, RacerOrm, values, on_duplicate_key_update)
 
+    def make_retired(self, racer_registration_number: int) -> bool:
+        session = Session()
+
+        try:
+            racer_orm = (
+                session.query(RacerOrm)
+                .filter_by(registration_number=racer_registration_number)
+                .first()
+            )
+            if racer_orm is None:
+                racer_orm = RacerOrm(registration_number=racer_registration_number)
+                session.add(racer_orm)
+
+            racer_orm.status = RacerStatus.retired.value
+
+            session.commit()
+        except Exception as e:
+            session.rollback()
+            raise e
+        finally:
+            session.close()
+
+        return True
+
 
 def _transform_racer_condition_entity(
     entity: RacerConditionEntity,

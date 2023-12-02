@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Any, Dict, TypedDict, Union
 
-from metaboatrace.scrapers.official.website.exceptions import DataNotFound
+from metaboatrace.scrapers.official.website.exceptions import DataNotFound, RaceCanceled
 
 from metaboatrace.crawlers.race import (
     crawl_race_before_information_page,
@@ -9,6 +9,7 @@ from metaboatrace.crawlers.race import (
     crawl_race_result_page,
     crawl_trifecta_odds_page,
 )
+from metaboatrace.repositories import RaceRepository
 
 
 class RaceHandlerEvent(TypedDict, total=False):
@@ -43,7 +44,11 @@ def crawl_race_information_handler(
         crawl_race_information_page(stadium_tel_code, date_obj, race_number)
         return {"success": True}
     except DataNotFound as e:
-        return {"success": False, "errorCode": "RACER_NOT_FOUND"}
+        return {"success": False, "errorCode": "RACE_NOT_FOUND"}
+    except RaceCanceled as e:
+        repository = RaceRepository()
+        repository.cancel(stadium_tel_code, date_obj, race_number)
+        return {"success": False, "errorCode": "RACE_HAD_CANCELED"}
 
 
 def crawl_race_before_information_handler(
@@ -55,7 +60,11 @@ def crawl_race_before_information_handler(
         crawl_race_before_information_page(stadium_tel_code, date_obj, race_number)
         return {"success": True}
     except DataNotFound as e:
-        return {"success": False, "errorCode": "RACER_NOT_FOUND"}
+        return {"success": False, "errorCode": "RACE_NOT_FOUND"}
+    except RaceCanceled as e:
+        repository = RaceRepository()
+        repository.cancel(stadium_tel_code, date_obj, race_number)
+        return {"success": False, "errorCode": "RACE_HAD_CANCELED"}
 
 
 def crawl_odds_handler(event: RaceHandlerEvent, context: Any) -> Dict[str, Union[bool, str]]:
@@ -65,8 +74,11 @@ def crawl_odds_handler(event: RaceHandlerEvent, context: Any) -> Dict[str, Union
         crawl_trifecta_odds_page(stadium_tel_code, date_obj, race_number)
         return {"success": True}
     except DataNotFound as e:
-        # TODO: ここではレース中止系の例外を拾うのが正解（他のハンドラでも同様）
-        return {"success": False, "errorCode": "RACER_NOT_FOUND"}
+        return {"success": False, "errorCode": "RACE_NOT_FOUND"}
+    except RaceCanceled as e:
+        repository = RaceRepository()
+        repository.cancel(stadium_tel_code, date_obj, race_number)
+        return {"success": False, "errorCode": "RACE_HAD_CANCELED"}
 
 
 def crawl_race_result_handler(event: RaceHandlerEvent, context: Any) -> Dict[str, Union[bool, str]]:
@@ -76,4 +88,8 @@ def crawl_race_result_handler(event: RaceHandlerEvent, context: Any) -> Dict[str
         crawl_race_result_page(stadium_tel_code, date_obj, race_number)
         return {"success": True}
     except DataNotFound as e:
-        return {"success": False, "errorCode": "RACER_NOT_FOUND"}
+        return {"success": False, "errorCode": "RACE_NOT_FOUND"}
+    except RaceCanceled as e:
+        repository = RaceRepository()
+        repository.cancel(stadium_tel_code, date_obj, race_number)
+        return {"success": False, "errorCode": "RACE_HAD_CANCELED"}

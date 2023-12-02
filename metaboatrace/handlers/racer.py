@@ -20,4 +20,6 @@ def crawl_racer_profile_handler(event: Event, context: Any) -> Dict[str, Union[b
         crawl_racer_from_racer_profile_page(racer_registration_number, RacerRepository())
         return {"success": True}
     except DataNotFound as e:
-        return {"success": False, "errorCode": "RACER_NOT_FOUND"}
+        repository = RacerRepository()
+        repository.make_retired(racer_registration_number)
+        return {"success": False, "errorCode": "RACER_HAD_RETIRED"}
