@@ -22,11 +22,11 @@ class Race(Base):
     stadium_tel_code = Column(Integer, ForeignKey("stadiums.tel_code"), primary_key=True)
     date = Column(Date, primary_key=True)
     race_number = Column(Integer, primary_key=True)
-    title = Column(String(255), nullable=False)
+    title = Column(String(255), nullable=True)  # 中止の時を考慮してNULL許容
     is_course_fixed = Column(Boolean, default=False, nullable=False)
     is_stabilizer_used = Column(Boolean, default=False, nullable=False)
     number_of_laps = Column(Integer, default=3, nullable=False)
-    betting_deadline_at = Column(DateTime, nullable=False, index=True)
+    betting_deadline_at = Column(DateTime, nullable=True)  # 中止の時を考慮してNULL許容
     is_canceled = Column(Boolean, default=False, server_default=text("false"), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, nullable=False, onupdate=datetime.utcnow)
