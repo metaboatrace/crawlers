@@ -53,13 +53,14 @@ plugins:
 #  environment:
 #    variable1: value1
 
-# you can add packaging information here
-#package:
-#  patterns:
-#    - '!exclude-me.py'
-#    - '!exclude-me-dir/**'
-#    - include-me.py
-#    - include-me-dir/**
+package:
+  exclude:
+    - "**/*" # すべてのファイルを初期的に除外
+    - "!metaboatrace/**" # 関数本体を含める
+    - "!.venv/lib/python3.11/site-packages/**" # Pythonの依存関係を含める
+    - ".venv/lib/python3.11/site-packages/**/*.so" # .so ファイルを除外
+    - "!requirements.lock" # 必要な依存関係を指定するファイル
+    - "!pyproject.toml" # プロジェクトの設定ファイル
 
 functions:
   crawlRacerProfile:
