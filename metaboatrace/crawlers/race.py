@@ -45,6 +45,7 @@ from metaboatrace.repositories import (
     CircumferenceExhibitionRecordRepository,
     DisqualifiedRaceEntryRepository,
     MotorBettingContributeRateAggregationRepository,
+    MotorMaintenanceRepository,
     OddsRepository,
     PayoffRepository,
     RaceEntryRepository,
@@ -126,6 +127,11 @@ def crawl_race_before_information_page(stadium_tel_code: int, date: date, race_n
     boat_settings = extract_boat_settings(html_io)
     boat_setting_repository = BoatSettingRepository()
     boat_setting_repository.create_or_update_many(boat_settings, ["tilt", "is_propeller_renewed"])
+
+    motor_maintenance_repsitory = MotorMaintenanceRepository()
+    motor_maintenance_repsitory.create_or_update_many(
+        [b for b in boat_settings if 0 < len(b.motor_parts_exchanges)]
+    )
 
     html_io.seek(0)
     weather_condition = extract_weather_condition(html_io)
