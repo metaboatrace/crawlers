@@ -125,7 +125,7 @@ def crawl_race_before_information_page(stadium_tel_code: int, date: date, race_n
     html_io.seek(0)
     boat_settings = extract_boat_settings(html_io)
     boat_setting_repository = BoatSettingRepository()
-    boat_setting_repository.create_or_update_many(boat_settings, ["tilt", "propeller_renewed"])
+    boat_setting_repository.create_or_update_many(boat_settings, ["tilt", "is_propeller_renewed"])
 
     html_io.seek(0)
     weather_condition = extract_weather_condition(html_io)

@@ -33,7 +33,7 @@ def _transform_boat_setting_entity(entity: BoatSettingEntity) -> dict[str, Any]:
 
 class BoatSettingRepository(Repository[BoatSettingEntity]):
     def create_or_update(self, entity: BoatSettingEntity) -> bool:
-        return self.create_or_update_many([entity], ["tilt", "propeller_renewed"])
+        return self.create_or_update_many([entity], ["tilt", "is_propeller_renewed"])
 
     def create_or_update_many(
         self, data: list[BoatSettingEntity], on_duplicate_key_update: list[str]
