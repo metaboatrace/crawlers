@@ -28,6 +28,7 @@ dev-dependencies = [
     "mypy>=1.7.0",
     "black>=23.7.0",
     "pytest>=7.4.0",
+    "localstack>=3.0.2",
 ]
 
 [tool.hatch.metadata]
