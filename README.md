@@ -77,3 +77,5 @@ Running "serverless" from node_modules
     "errorCode": "RACER_HAD_RETIRED"
 }
 ```
+
+※ `serverless.yml` が配置されている場所（プロジェクトルート）で実行してください
