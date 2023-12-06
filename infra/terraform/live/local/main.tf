@@ -35,7 +35,7 @@ resource "aws_s3_bucket" "test-bucket" {
 resource "aws_s3_object" "lambda_zip" {
   bucket = aws_s3_bucket.test-bucket.bucket
   key    = "mylambda.zip"
-  source = "../.serverless/metaboatrace-crawlers.zip"
+  source = "../../../../.serverless/metaboatrace-crawlers.zip"
 }
 
 resource "aws_lambda_function" "crawlRacerProfile" {
