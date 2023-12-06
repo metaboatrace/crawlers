@@ -1,0 +1,26 @@
+version: '3'
+
+services:
+  localstack:
+    image: localstack/localstack
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=iam,s3,lambda
+      - DEFAULT_REGION=us-east-1
+    networks:
+      - default
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+  db:
+    image: mysql:8.2
+    platform: linux/x86_64
+    environment:
+      MYSQL_ROOT_PASSWORD: 'password'
+    networks:
+      - default
+    ports:
+      - '53306:3306'
+    command:
+      - --default-authentication-plugin=mysql_native_password
+      - --sql-mode=NO_ENGINE_SUBSTITUTION
