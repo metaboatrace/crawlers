@@ -9,13 +9,15 @@
 
 1. `npm install`
 
-1. RDB を用意（ここではローカル開発環境では MySQL、本番は Amazon Aurora Serverless を想定）
+1. `docker-compose -f infra/docker-compose.local.yml up`
 
 1. 環境変数 `DATABASE_URL` を設定
 
-1. データベースを作成 e.g. `CREATE DATABASE metaboatrace CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`
+1. データベースを作成 e.g. `CREATE DATABASE metaboatrace_dev CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`
 
 1. `python scripts/initialize_or_update_db.py` を実行してテーブルを生成
+
+1. `python scripts/initialize_master_data.py` を実行して初期データをインポート
 
 ## ローカル開発環境構築
 
@@ -47,13 +49,6 @@ is 1.6.5. You can update by downloading from https://www.terraform.io/downloads.
 ※ 2023.08.10 に、元来 OSS (MPL)として提供されてきた Terraform のライセンスが BSL に変更されるという発表があった  
 ※ v1.5.5 以下は MPL 2.0 のままなのでここでは v1.5.5 をインストールすることにしてる
 
-### LocalStack の起動
-
-```bash
-$ rye sync
-$ rye run localstack start
-```
-
 ### Lambda で使用する .zip ファイルアーカイブの生成
 
 ```bash
@@ -63,7 +58,8 @@ $ serverless package
 ### プロビジョニング
 
 ```bash
-$ cd infra/
+$ cd infra/terraform/live/local/
+$ rye run tflocal init
 $ rye run tflocal apply
 ```
 
@@ -78,6 +74,6 @@ $ serverless invoke local -f crawlRacerProfile -d '{"racer_registration_number":
 Running "serverless" from node_modules
 {
     "success": false,
-    "errorCode": "RACER_NOT_FOUND"
+    "errorCode": "RACER_HAD_RETIRED"
 }
 ```
