@@ -24,3 +24,9 @@ services:
     command:
       - --default-authentication-plugin=mysql_native_password
       - --sql-mode=NO_ENGINE_SUBSTITUTION
+  redis:
+    image: redis:latest
+    ports:
+      - '6379:6379'
+    networks:
+      - default
