@@ -5,13 +5,15 @@
 
 ## ローカル開発環境構築
 
+※ Mac (M2) MacOS 14.1.2（23B92）にて確認
+
+1. `brew install postgresql` (`psycopg2` をビルドするために `pg_config` コマンドが必要で、これは通常 PostgreSQL をインストールすれば入る)
+
 1. `rye sync`
 
 1. `docker-compose up`
 
 1. 環境変数 `DATABASE_URL` を設定
-
-1. データベースを作成 e.g. `CREATE DATABASE metaboatrace_dev CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`
 
 1. `python scripts/initialize_or_update_db.py` を実行してテーブルを生成
 
