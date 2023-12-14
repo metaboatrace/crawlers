@@ -3,7 +3,7 @@
 - Python 3.11+
 - Node.js 18.17+
 
-## インストール手順
+## ローカル開発環境構築
 
 1. `rye sync`
 
@@ -16,10 +16,6 @@
 1. `python scripts/initialize_or_update_db.py` を実行してテーブルを生成
 
 1. `python scripts/initialize_master_data.py` を実行して初期データをインポート
-
-## ローカル開発環境構築
-
-※ Docker Compose で各コンテナが起動していることが前提
 
 1. `python -m celery -A metaboatrace worker --loglevel=info`
 
