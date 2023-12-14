@@ -5,11 +5,9 @@
 
 ## インストール手順
 
-1. `npm install -g serverless`
+1. `rye sync`
 
-1. `npm install`
-
-1. `docker-compose -f infra/docker-compose.local.yml up`
+1. `docker-compose up`
 
 1. 環境変数 `DATABASE_URL` を設定
 
@@ -21,61 +19,8 @@
 
 ## ローカル開発環境構築
 
-### tfenv のインストール
+※ Docker Compose で各コンテナが起動していることが前提
 
-以下、Mac での例
+1. `python -m celery -A metaboatrace worker --loglevel=info`
 
-```bash
-$ brew install tfenv
-$ tfenv --version
-tfenv 3.0.0
-```
-
-### Terraform のインストール
-
-前章でインストールした tfenv を経由して Terraform をインストールする
-
-```bash
-$ tfenv install 1.5.5
-$ tfenv use 1.5.5
-$ terraform -version
-Terraform v1.5.5
-on darwin_arm64
-
-Your version of Terraform is out of date! The latest version
-is 1.6.5. You can update by downloading from https://www.terraform.io/downloads.html
-```
-
-※ 2023.08.10 に、元来 OSS (MPL)として提供されてきた Terraform のライセンスが BSL に変更されるという発表があった  
-※ v1.5.5 以下は MPL 2.0 のままなのでここでは v1.5.5 をインストールすることにしてる
-
-### Lambda で使用する .zip ファイルアーカイブの生成
-
-```bash
-$ serverless package
-```
-
-### プロビジョニング
-
-```bash
-$ cd infra/terraform/live/local/
-$ rye run tflocal init
-$ rye run tflocal apply
-```
-
-※ yes を Enter してください
-
-## Usage
-
-### ローカルでのハンドラの実行例
-
-```
-$ serverless invoke local -f crawlRacerProfile -d '{"racer_registration_number": 1}'
-Running "serverless" from node_modules
-{
-    "success": false,
-    "errorCode": "RACER_HAD_RETIRED"
-}
-```
-
-※ `serverless.yml` が配置されている場所（プロジェクトルート）で実行してください
+1. `python -m celery -A metaboatrace flower`
