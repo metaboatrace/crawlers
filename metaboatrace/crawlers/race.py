@@ -1,7 +1,25 @@
 from datetime import date
 
-from metaboatrace.models.race import BoatSetting
+from metaboatrace.crawlers.utils import fetch_html_as_io
+from metaboatrace.models.race import BoatSetting, RaceEntry
 from metaboatrace.models.stadium import StadiumTelCode
+from metaboatrace.repositories import (
+    BoatBettingContributeRateAggregationRepository,
+    BoatSettingRepository,
+    CircumferenceExhibitionRecordRepository,
+    DisqualifiedRaceEntryRepository,
+    MotorBettingContributeRateAggregationRepository,
+    MotorMaintenanceRepository,
+    OddsRepository,
+    PayoffRepository,
+    RaceEntryRepository,
+    RacerConditionRepository,
+    RaceRecordRepository,
+    RaceRepository,
+    StartExhibitionRecordRepository,
+    WeatherConditionRepository,
+    WinningRaceEntryRepository,
+)
 from metaboatrace.scrapers.official.website.v1707.pages.race.before_information_page.location import (
     create_race_before_information_page_url,
 )
@@ -38,24 +56,17 @@ from metaboatrace.scrapers.official.website.v1707.pages.race.result_page.scrapin
     extract_weather_condition as extract_weather_condition_in_performance,
 )
 
-from metaboatrace.crawlers.utils import fetch_html_as_io
-from metaboatrace.repositories import (
-    BoatBettingContributeRateAggregationRepository,
-    BoatSettingRepository,
-    CircumferenceExhibitionRecordRepository,
-    DisqualifiedRaceEntryRepository,
-    MotorBettingContributeRateAggregationRepository,
-    MotorMaintenanceRepository,
-    OddsRepository,
-    PayoffRepository,
-    RaceEntryRepository,
-    RacerConditionRepository,
-    RaceRecordRepository,
-    RaceRepository,
-    StartExhibitionRecordRepository,
-    WeatherConditionRepository,
-    WinningRaceEntryRepository,
-)
+
+def _create_boat_setting_from(race_entry: RaceEntry) -> BoatSetting:
+    return BoatSetting(
+        race_holding_date=race_entry.race_holding_date,
+        stadium_tel_code=race_entry.stadium_tel_code,
+        race_number=race_entry.race_number,
+        pit_number=race_entry.pit_number,
+        boat_number=race_entry.boat_number,
+        motor_number=race_entry.motor_number,
+        motor_parts_exchanges=[],
+    )
 
 
 def crawl_race_information_page(stadium_tel_code: int, date: date, race_number: int) -> None:
@@ -71,19 +82,7 @@ def crawl_race_information_page(stadium_tel_code: int, date: date, race_number: 
     race_entry_repository.create_or_update_many(race_entries)
 
     html_io.seek(0)
-    # hack: ここでやらない
-    boat_settings = [
-        BoatSetting(
-            race_holding_date=race_entry.race_holding_date,
-            stadium_tel_code=race_entry.stadium_tel_code,
-            race_number=race_entry.race_number,
-            pit_number=race_entry.pit_number,
-            boat_number=race_entry.boat_number,
-            motor_number=race_entry.motor_number,
-            motor_parts_exchanges=[],
-        )
-        for race_entry in race_entries
-    ]
+    boat_settings = [_create_boat_setting_from(race_entry) for race_entry in race_entries]
     boat_setting_repository = BoatSettingRepository()
     boat_setting_repository.create_or_update_many(boat_settings, ["boat_number", "motor_number"])
 
