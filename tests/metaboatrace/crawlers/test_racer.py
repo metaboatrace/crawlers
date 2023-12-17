@@ -1,9 +1,9 @@
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
-from metaboatrace.models.racer import Racer
 
 from metaboatrace.crawlers.racer import crawl_racer_from_racer_profile_page
+from metaboatrace.models.racer import Racer
 
 
 @pytest.fixture
@@ -15,7 +15,7 @@ def mock_fetch_html_as_io():  # type: ignore
 
 @pytest.fixture
 def mock_extract_racer_profile():  # type: ignore
-    dummy_racer = Racer(registration_number=77777, last_name="エース")
+    dummy_racer = Racer(registration_number=77777, last_name="エース", first_name="モーターマン")
     with patch("metaboatrace.crawlers.racer.extract_racer_profile") as mock_func:
         mock_func.return_value = dummy_racer
         yield mock_func
