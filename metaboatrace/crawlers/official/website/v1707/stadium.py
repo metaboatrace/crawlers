@@ -1,9 +1,7 @@
 from datetime import date
 
-from metaboatrace.crawlers.utils import fetch_html_as_io
 from metaboatrace.models.racer import Racer
 from metaboatrace.models.stadium import Event, MotorRenewal, StadiumTelCode
-from metaboatrace.repositories import EventRepository, MotorRenewalRepository, RacerRepository
 from metaboatrace.scrapers.official.website.v1707.pages.monthly_schedule_page.location import (
     create_monthly_schedule_page_url,
 )
@@ -18,9 +16,12 @@ from metaboatrace.scrapers.official.website.v1707.pages.pre_inspection_informati
     extract_racers,
 )
 
+from metaboatrace.crawlers.utils import fetch_html_as_io
+from metaboatrace.repositories import EventRepository, MotorRenewalRepository, RacerRepository
+
 
 def crawl_events_from_monthly_schedule_page(
-    year: int, month: int, repository: EventRepository
+    year: int, month: int, repository: EventRepository = EventRepository()
 ) -> None:
     url = create_monthly_schedule_page_url(year, month)
     html_io = fetch_html_as_io(url)
