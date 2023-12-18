@@ -1,3 +1,4 @@
+import time
 from datetime import datetime
 
 from metaboatrace.models.stadium import EventHoldingStatus
@@ -9,6 +10,7 @@ from metaboatrace.crawlers.official.website.v1707.race import (
 from metaboatrace.crawlers.official.website.v1707.stadium import (
     crawl_event_holding_page,
     crawl_events_from_monthly_schedule_page,
+    crawl_pre_inspection_information_page,
 )
 
 # HACK: @app.task デコレータを関数定義時に適用することが一般的だが、名前空間パッケージを使ってる兼ね合いからかエラーになるのでここでデコレート
@@ -24,6 +26,7 @@ def schedule_crawl_events_from_monthly_schedule_page() -> None:
     crawl_events_from_monthly_schedule_page(year, month)
 
 
+@app.task
 def schedule_crawl_all_race_information_for_today() -> None:
     date = datetime.today()
     event_holdings = crawl_event_holding_page(date)
@@ -32,3 +35,15 @@ def schedule_crawl_all_race_information_for_today() -> None:
     ]
     stadium_tel_codes = [e.stadium_tel_code for e in will_be_opned_event_holdings]
     crawl_all_race_information_for_date_and_stadiums(date, stadium_tel_codes)
+
+
+@app.task
+def schedule_crawl_events_starting_today_for_today() -> None:
+    date = datetime.today()
+    event_holdings = crawl_event_holding_page(date)
+    events_starting_today = [
+        e for e in event_holdings if e.status == EventHoldingStatus.OPEN and e.progress_day == 1
+    ]
+    for event_holding in events_starting_today:
+        crawl_pre_inspection_information_page(event_holding.stadium_tel_code.value, date)
+        time.sleep(1)
