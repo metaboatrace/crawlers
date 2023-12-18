@@ -21,4 +21,8 @@ app.conf.beat_schedule = {
         "task": "metaboatrace.crawlers.scheduler.schedule_crawl_events_starting_today_for_today",
         "schedule": crontab(hour=23, minute=15),
     },
+    "crawl-incomplete-racers-every-5-minutes": {
+        "task": "metaboatrace.crawlers.scheduler.enqueue_incomplete_racer_crawling",
+        "schedule": crontab(minute="*/5"),
+    },
 }
