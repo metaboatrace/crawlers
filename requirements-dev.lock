@@ -26,8 +26,8 @@ humanize==4.9.0
 idna==3.4
 iniconfig==2.0.0
 kombu==5.3.4
-metaboatrace-models==2.0.0
-metaboatrace-scrapers==2.1.0
+metaboatrace-models==2.1.4
+metaboatrace-scrapers==3.0.0
 mypy==1.7.0
 mypy-extensions==1.0.0
 numpy==1.25.2
@@ -42,7 +42,7 @@ pycparser==2.21
 pydantic==2.1.1
 pydantic-core==2.4.0
 pymysql==1.1.0
-pytest==7.4.0
+pytest==7.4.3
 python-dateutil==2.8.2
 pytz==2023.3.post1
 redis==5.0.1
@@ -51,6 +51,7 @@ six==1.16.0
 soupsieve==2.4.1
 sqlalchemy==2.0.23
 tornado==6.4
+types-pytz==2023.3.1.1
 types-requests==2.31.0.2
 types-urllib3==1.26.25.14
 typing-extensions==4.7.1

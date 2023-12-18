@@ -1,25 +1,8 @@
+import time
 from datetime import date
 
-from metaboatrace.crawlers.utils import fetch_html_as_io
 from metaboatrace.models.race import BoatSetting, RaceEntry
 from metaboatrace.models.stadium import StadiumTelCode
-from metaboatrace.repositories import (
-    BoatBettingContributeRateAggregationRepository,
-    BoatSettingRepository,
-    CircumferenceExhibitionRecordRepository,
-    DisqualifiedRaceEntryRepository,
-    MotorBettingContributeRateAggregationRepository,
-    MotorMaintenanceRepository,
-    OddsRepository,
-    PayoffRepository,
-    RaceEntryRepository,
-    RacerConditionRepository,
-    RaceRecordRepository,
-    RaceRepository,
-    StartExhibitionRecordRepository,
-    WeatherConditionRepository,
-    WinningRaceEntryRepository,
-)
 from metaboatrace.scrapers.official.website.v1707.pages.race.before_information_page.location import (
     create_race_before_information_page_url,
 )
@@ -54,6 +37,25 @@ from metaboatrace.scrapers.official.website.v1707.pages.race.result_page.scrapin
 )
 from metaboatrace.scrapers.official.website.v1707.pages.race.result_page.scraping import (
     extract_weather_condition as extract_weather_condition_in_performance,
+)
+
+from metaboatrace.crawlers.utils import fetch_html_as_io
+from metaboatrace.repositories import (
+    BoatBettingContributeRateAggregationRepository,
+    BoatSettingRepository,
+    CircumferenceExhibitionRecordRepository,
+    DisqualifiedRaceEntryRepository,
+    MotorBettingContributeRateAggregationRepository,
+    MotorMaintenanceRepository,
+    OddsRepository,
+    PayoffRepository,
+    RaceEntryRepository,
+    RacerConditionRepository,
+    RaceRecordRepository,
+    RaceRepository,
+    StartExhibitionRecordRepository,
+    WeatherConditionRepository,
+    WinningRaceEntryRepository,
 )
 
 
@@ -99,6 +101,23 @@ def crawl_race_information_page(stadium_tel_code: int, date: date, race_number: 
         MotorBettingContributeRateAggregationRepository()
     )
     motor_betting_contribute_rate_aggregation_repository.create_or_update_many(motor_performances)
+
+
+# HACK: 型に統一性がない
+# stadium_tel_code 系の引数の型が int だったり StadiumTelCode だったりするのはサーバーレスアーキテクチャ採用時の名残
+def crawl_all_race_information_for_date_and_stadiums(
+    date: date, stadium_tel_codes: list[StadiumTelCode]
+) -> None:
+    for stadium_tel_code in stadium_tel_codes:
+        for race_number in range(1, 13):
+            try:
+                crawl_race_information_page(stadium_tel_code.value, date, race_number)
+                time.sleep(3)
+            except Exception as e:
+                # TODO: バグトラッキングシステムに通知
+                print(
+                    f"Error crawling race {race_number} at {stadium_tel_code.name} on {date}: {e}"
+                )
 
 
 def crawl_race_before_information_page(stadium_tel_code: int, date: date, race_number: int) -> None:

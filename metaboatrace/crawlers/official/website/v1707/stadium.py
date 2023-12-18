@@ -1,9 +1,13 @@
 from datetime import date
 
-from metaboatrace.crawlers.utils import fetch_html_as_io
 from metaboatrace.models.racer import Racer
-from metaboatrace.models.stadium import Event, MotorRenewal, StadiumTelCode
-from metaboatrace.repositories import EventRepository, MotorRenewalRepository, RacerRepository
+from metaboatrace.models.stadium import Event, EventHolding, MotorRenewal, StadiumTelCode
+from metaboatrace.scrapers.official.website.v1707.pages.event_holding_page.location import (
+    create_event_holding_page_url,
+)
+from metaboatrace.scrapers.official.website.v1707.pages.event_holding_page.scraping import (
+    extract_event_holdings,
+)
 from metaboatrace.scrapers.official.website.v1707.pages.monthly_schedule_page.location import (
     create_monthly_schedule_page_url,
 )
@@ -18,9 +22,12 @@ from metaboatrace.scrapers.official.website.v1707.pages.pre_inspection_informati
     extract_racers,
 )
 
+from metaboatrace.crawlers.utils import fetch_html_as_io
+from metaboatrace.repositories import EventRepository, MotorRenewalRepository, RacerRepository
+
 
 def crawl_events_from_monthly_schedule_page(
-    year: int, month: int, repository: EventRepository
+    year: int, month: int, repository: EventRepository = EventRepository()
 ) -> None:
     url = create_monthly_schedule_page_url(year, month)
     html_io = fetch_html_as_io(url)
@@ -44,3 +51,10 @@ def crawl_pre_inspection_information_page(
         motor_renewal_repository.create_or_update(
             MotorRenewal(stadium_tel_code=stadium_tel_code, date=date)
         )
+
+
+# TODO: インターフェースが他と明らかに不揃いなのでメソッド名を変えるかなんかして対応
+def crawl_event_holding_page(date: date) -> list[EventHolding]:
+    url = create_event_holding_page_url(date)
+    html_io = fetch_html_as_io(url)
+    return extract_event_holdings(html_io)

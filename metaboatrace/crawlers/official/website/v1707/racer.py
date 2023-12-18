@@ -11,7 +11,7 @@ from metaboatrace.repositories import RacerRepository
 
 
 def crawl_racer_from_racer_profile_page(
-    racer_registration_number: int, repository: RacerRepository
+    racer_registration_number: int, repository: RacerRepository = RacerRepository()
 ) -> None:
     url = create_racer_profile_page_url(racer_registration_number)
     html_io = fetch_html_as_io(url)
