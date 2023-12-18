@@ -17,6 +17,8 @@ dependencies = [
     "flower>=2.0.1",
     "redis>=5.0.1",
     "psycopg2>=2.9.9",
+    "pytz>=2023.3.post1",
+    "types-pytz>=2023.3.1.1",
 ]
 readme = "README.md"
 requires-python = ">= 3.11"
