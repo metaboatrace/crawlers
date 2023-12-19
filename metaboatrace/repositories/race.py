@@ -4,6 +4,7 @@ from typing import Any
 from metaboatrace.models.race import (
     CircumferenceExhibitionRecord as CircumferenceExhibitionRecordEntity,
 )
+from metaboatrace.models.race import Disqualification
 from metaboatrace.models.race import Odds as OddsEntity
 from metaboatrace.models.race import Payoff as PayoffEntity
 from metaboatrace.models.race import RaceEntry as RaceEntryEntity
@@ -315,7 +316,11 @@ class RaceRecordRepository(Repository[RaceRecordEntity]):
             "arrival",
         ],
     ) -> bool:
-        values = [_transform_race_record_entity(entity) for entity in data]
+        values = [
+            _transform_race_record_entity(entity)
+            for entity in data
+            if entity.disqualification != Disqualification.ABSENT
+        ]
 
         upsert_strategy = create_upsert_strategy()
         session = Session()
