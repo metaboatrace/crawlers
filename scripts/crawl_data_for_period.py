@@ -37,6 +37,7 @@ def _parse_args() -> argparse.Namespace:
         help="開始日 (YYYY-MM-DD 形式)",
     )
     parser.add_argument("end_date", type=_valid_end_date, help="終了日 (YYYY-MM-DD 形式)")
+    parser.add_argument("--sleep", type=int, default=1, help="クロール間のスリープ時間 (秒)")
     return parser.parse_args()
 
 
@@ -44,8 +45,7 @@ def _main() -> None:
     args = _parse_args()
     start_date = args.start_date
     end_date = args.end_date
-
-    SLEEP_SECOND = 1
+    sleep_second = args.sleep
 
     total_days = (end_date - start_date).days + 1
 
@@ -56,7 +56,7 @@ def _main() -> None:
         if current_date.day == 1:
             crawl_events_from_monthly_schedule_page(current_date.year, current_date.month)
             print("\tProcessing monthly schedule page.")
-            sleep(SLEEP_SECOND)
+            sleep(sleep_second)
 
         event_holdings = crawl_event_holding_page(current_date)
         will_be_opned_event_holdings = [
@@ -67,10 +67,12 @@ def _main() -> None:
             if e.progress_day == 1:
                 try:
                     crawl_pre_inspection_information_page(e.stadium_tel_code.value, current_date)
-                    print("\tProcessing pre inspection information page.")
-                    sleep(SLEEP_SECOND)
+                    print("\t\tProcessing pre inspection information page.")
+                    sleep(sleep_second)
                 except DataNotFound:
-                    print("\t\tThe pre inspection information page had not found.")
+                    print(
+                        "\t\t\t\033[93m[warn] The pre inspection information page had not found.\033[0m"
+                    )
 
             for race_number in range(1, 13):
                 print(f"\t\tProcessing {race_number}R pages.")
@@ -84,9 +86,9 @@ def _main() -> None:
 
                     for crawl_function in crawl_functions:
                         crawl_function(e.stadium_tel_code.value, current_date, race_number)
-                        sleep(SLEEP_SECOND)
+                        sleep(sleep_second)
                 except RaceCanceled:
-                    print("\t\t\tThe race had canceled.")
+                    print("\t\t\t\033[91merror: The race had canceled.\033[0m")
 
 
 if __name__ == "__main__":
