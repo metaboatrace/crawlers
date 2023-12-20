@@ -6,6 +6,7 @@ from metaboatrace.models.stadium import EventHoldingStatus
 from metaboatrace.scrapers.official.website.exceptions import DataNotFound, RaceCanceled
 from tqdm import tqdm
 
+from metaboatrace.crawlers.exceptions import IncompleteDataError
 from metaboatrace.crawlers.official.website.v1707.race import (
     crawl_race_before_information_page,
     crawl_race_information_page,
@@ -17,6 +18,7 @@ from metaboatrace.crawlers.official.website.v1707.stadium import (
     crawl_events_from_monthly_schedule_page,
     crawl_pre_inspection_information_page,
 )
+from metaboatrace.repositories import RaceRepository
 
 
 def _valid_end_date(s: str) -> datetime.date:
@@ -85,10 +87,25 @@ def _main() -> None:
                     ]
 
                     for crawl_function in crawl_functions:
-                        crawl_function(e.stadium_tel_code.value, current_date, race_number)
+                        try:
+                            crawl_function(e.stadium_tel_code.value, current_date, race_number)
+                        except IncompleteDataError:
+                            print(
+                                "\t\t\t\033[94m[notice] Partial data missing in {function}. Continuing with next task.\033[0m".format(
+                                    function=crawl_function.__name__
+                                )
+                            )
+
                         sleep(sleep_second)
                 except RaceCanceled:
-                    print("\t\t\t\033[91merror: The race had canceled.\033[0m")
+                    # HACK: 展示航走までは実施されてるならレース結果をスクレピングしたらこの例外出るけど
+                    # 展示も実施されてないなら ValueError とかが出てここに到達しないのでは？
+                    repository = RaceRepository()
+                    repository.cancel(e.stadium_tel_code.value, current_date, race_number)
+                    print(
+                        "\t\t\t\033[90m[info] The race was canceled. Moving to the next event.\033[0m"
+                    )
+                    break
 
 
 if __name__ == "__main__":
