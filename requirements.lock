@@ -25,8 +25,8 @@ humanize==4.9.0
 idna==3.4
 iniconfig==2.0.0
 kombu==5.3.4
-metaboatrace-models==2.1.4
-metaboatrace-scrapers==3.0.0
+metaboatrace-models==2.1.5
+metaboatrace-scrapers==3.0.4
 numpy==1.25.2
 packaging==23.2
 pluggy==1.3.0
