@@ -39,6 +39,7 @@ from metaboatrace.scrapers.official.website.v1707.pages.race.result_page.scrapin
     extract_weather_condition as extract_weather_condition_in_performance,
 )
 
+from metaboatrace.crawlers.exceptions import IncompleteDataError
 from metaboatrace.crawlers.utils import fetch_html_as_io
 from metaboatrace.repositories import (
     BoatBettingContributeRateAggregationRepository,
@@ -152,7 +153,12 @@ def crawl_race_before_information_page(stadium_tel_code: int, date: date, race_n
     )
 
     html_io.seek(0)
-    weather_condition = extract_weather_condition(html_io)
+    try:
+        weather_condition = extract_weather_condition(html_io)
+    except ValueError:
+        # note: 他のデータは正常に取れるのに気象情報だけ取れないケースがごく稀にある
+        # https://boatrace.jp/owpc/pc/race/beforeinfo?rno=1&jcd=15&hd=20231124
+        raise IncompleteDataError
     weather_condition_repository = WeatherConditionRepository()
     weather_condition_repository.create_or_update(weather_condition)
 

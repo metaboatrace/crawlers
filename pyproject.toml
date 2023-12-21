@@ -6,8 +6,8 @@ authors = [
     { name = "k0kishima", email = "okishimaxyz@gmail.com" }
 ]
 dependencies = [
-    "metaboatrace.models>=2.1.4",
-    "metaboatrace.scrapers>=3.0.0",
+    "metaboatrace.models>=2.1.5",
+    "metaboatrace.scrapers>=3.0.6",
     "requests>=2.31.0",
     "types-requests>=2.31.0.2",
     "SQLAlchemy>=2.0.23",
@@ -19,6 +19,7 @@ dependencies = [
     "psycopg2>=2.9.9",
     "pytz>=2023.3.post1",
     "types-pytz>=2023.3.1.1",
+    "tqdm>=4.66.1",
 ]
 readme = "README.md"
 requires-python = ">= 3.11"

@@ -1,0 +1,2 @@
+class IncompleteDataError(Exception):
+    pass
