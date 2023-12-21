@@ -3,9 +3,6 @@ from datetime import date
 
 from metaboatrace.models.race import BoatSetting, RaceEntry
 from metaboatrace.models.stadium import StadiumTelCode
-from metaboatrace.scrapers.official.website.v1707.pages.race.before_information_page.location import (
-    create_race_before_information_page_url,
-)
 from metaboatrace.scrapers.official.website.v1707.pages.race.before_information_page.scraping import (
     extract_boat_settings,
     extract_circumference_exhibition_records,
@@ -13,23 +10,14 @@ from metaboatrace.scrapers.official.website.v1707.pages.race.before_information_
     extract_start_exhibition_records,
     extract_weather_condition,
 )
-from metaboatrace.scrapers.official.website.v1707.pages.race.entry_page.location import (
-    create_race_entry_page_url,
-)
 from metaboatrace.scrapers.official.website.v1707.pages.race.entry_page.scraping import (
     extract_boat_performances,
     extract_motor_performances,
     extract_race_entries,
     extract_race_information,
 )
-from metaboatrace.scrapers.official.website.v1707.pages.race.odds.trifecta_page.location import (
-    create_odds_page_url,
-)
 from metaboatrace.scrapers.official.website.v1707.pages.race.odds.trifecta_page.scraping import (
     extract_odds,
-)
-from metaboatrace.scrapers.official.website.v1707.pages.race.result_page.location import (
-    create_race_result_page_url,
 )
 from metaboatrace.scrapers.official.website.v1707.pages.race.result_page.scraping import (
     extract_race_payoffs,
@@ -40,6 +28,12 @@ from metaboatrace.scrapers.official.website.v1707.pages.race.result_page.scrapin
 )
 
 from metaboatrace.crawlers.exceptions import IncompleteDataError
+from metaboatrace.crawlers.official.website.v1707.proxy import (
+    create_odds_page_url,
+    create_race_before_information_page_url,
+    create_race_entry_page_url,
+    create_race_result_page_url,
+)
 from metaboatrace.crawlers.utils import fetch_html_as_io
 from metaboatrace.repositories import (
     BoatBettingContributeRateAggregationRepository,

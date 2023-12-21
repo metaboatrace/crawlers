@@ -96,7 +96,8 @@ def _main() -> None:
                                 )
                             )
 
-                        sleep(sleep_second)
+                    sleep(sleep_second)
+
                 except RaceCanceled:
                     # HACK: 展示航走までは実施されてるならレース結果をスクレピングしたらこの例外出るけど
                     # 展示も実施されてないなら ValueError とかが出てここに到達しないのでは？

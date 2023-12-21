@@ -2,26 +2,22 @@ from datetime import date
 
 from metaboatrace.models.racer import Racer
 from metaboatrace.models.stadium import Event, EventHolding, MotorRenewal, StadiumTelCode
-from metaboatrace.scrapers.official.website.v1707.pages.event_holding_page.location import (
-    create_event_holding_page_url,
-)
 from metaboatrace.scrapers.official.website.v1707.pages.event_holding_page.scraping import (
     extract_event_holdings,
 )
-from metaboatrace.scrapers.official.website.v1707.pages.monthly_schedule_page.location import (
-    create_monthly_schedule_page_url,
-)
 from metaboatrace.scrapers.official.website.v1707.pages.monthly_schedule_page.scraping import (
     extract_events,
-)
-from metaboatrace.scrapers.official.website.v1707.pages.pre_inspection_information_page.location import (
-    create_event_entry_page_url,
 )
 from metaboatrace.scrapers.official.website.v1707.pages.pre_inspection_information_page.scraping import (
     extract_event_entries,
     extract_racers,
 )
 
+from metaboatrace.crawlers.official.website.v1707.proxy import (
+    create_event_entry_page_url,
+    create_event_holding_page_url,
+    create_monthly_schedule_page_url,
+)
 from metaboatrace.crawlers.utils import fetch_html_as_io
 from metaboatrace.repositories import EventRepository, MotorRenewalRepository, RacerRepository
 

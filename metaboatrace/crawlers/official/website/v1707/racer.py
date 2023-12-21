@@ -1,11 +1,9 @@
 from metaboatrace.models.racer import Racer
-from metaboatrace.scrapers.official.website.v1707.pages.racer.profile_page.location import (
-    create_racer_profile_page_url,
-)
 from metaboatrace.scrapers.official.website.v1707.pages.racer.profile_page.scraping import (
     extract_racer_profile,
 )
 
+from metaboatrace.crawlers.official.website.v1707.proxy import create_racer_profile_page_url
 from metaboatrace.crawlers.utils import fetch_html_as_io
 from metaboatrace.repositories import RacerRepository
 
