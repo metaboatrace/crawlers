@@ -27,7 +27,7 @@ idna==3.4
 iniconfig==2.0.0
 kombu==5.3.4
 metaboatrace-models==2.1.5
-metaboatrace-scrapers==3.0.4
+metaboatrace-scrapers==3.0.6
 mypy==1.7.0
 mypy-extensions==1.0.0
 numpy==1.25.2

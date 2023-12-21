@@ -62,7 +62,7 @@ class StartExhibitionRecord(Base):
     race_number = Column(Integer, primary_key=True)
     pit_number = Column(Integer, primary_key=True)
     course_number = Column(Integer, nullable=False)
-    start_time = Column(Float, nullable=False)
+    start_time = Column(Float, nullable=False)  # note: 展示での出遅れは1で記録
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, nullable=False, onupdate=datetime.utcnow)
 
