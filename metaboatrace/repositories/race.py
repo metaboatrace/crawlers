@@ -321,7 +321,8 @@ class RaceRecordRepository(Repository[RaceRecordEntity]):
             for entity in data
             if (entity.disqualification != Disqualification.ABSENT)
             and not (
-                entity.disqualification == Disqualification.LATENESS and entity.pit_number is None
+                entity.disqualification == Disqualification.LATENESS
+                and entity.course_number is None
             )
         ]
 
