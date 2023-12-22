@@ -319,7 +319,10 @@ class RaceRecordRepository(Repository[RaceRecordEntity]):
         values = [
             _transform_race_record_entity(entity)
             for entity in data
-            if entity.disqualification != Disqualification.ABSENT
+            if (entity.disqualification != Disqualification.ABSENT)
+            and not (
+                entity.disqualification == Disqualification.LATENESS and entity.pit_number is None
+            )
         ]
 
         upsert_strategy = create_upsert_strategy()
