@@ -3,6 +3,7 @@ from datetime import date
 
 from metaboatrace.models.race import BoatSetting, RaceEntry
 from metaboatrace.models.stadium import StadiumTelCode
+from metaboatrace.scrapers.official.website.exceptions import DataNotFound, RaceCanceled
 from metaboatrace.scrapers.official.website.v1707.pages.race.before_information_page.location import (
     create_race_before_information_page_url,
 )
@@ -127,6 +128,18 @@ def crawl_race_before_information_page(stadium_tel_code: int, date: date, race_n
     )
     html_io = fetch_html_as_io(url)
     start_exhibition_records = extract_start_exhibition_records(html_io)
+    if not start_exhibition_records:
+        # note: レース中止で展示も実施されなかったらここが空になる
+        # https://boatrace.jp/owpc/pc/race/beforeinfo?rno=9&jcd=03&hd=20200503
+        # hack: レース中止かどうかは結果ページを見ないとわからない
+        # リアルタイムでクロールしているときは時系列的にレース中止の記載があるかは不明だが取れたら取る
+        try:
+            crawl_race_result_page(StadiumTelCode(stadium_tel_code), date, race_number)
+        except RaceCanceled:
+            raise
+        except Exception:
+            raise DataNotFound
+
     start_exhibition_record_repository = StartExhibitionRecordRepository()
     start_exhibition_record_repository.create_or_update_many(start_exhibition_records)
 
