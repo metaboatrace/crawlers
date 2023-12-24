@@ -126,6 +126,8 @@ def crawl_race_before_information_page(stadium_tel_code: int, date: date, race_n
     url = create_race_before_information_page_url(
         date, StadiumTelCode(stadium_tel_code), race_number
     )
+    # note: データが壊れてしまってるページがあったがこれはどうしようもない
+    # https://boatrace.jp/owpc/pc/race/beforeinfo?rno=3&jcd=01&hd=20200615
     html_io = fetch_html_as_io(url)
     start_exhibition_records = extract_start_exhibition_records(html_io)
     if not start_exhibition_records:
