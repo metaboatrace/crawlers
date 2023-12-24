@@ -1,8 +1,8 @@
 import time
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 
 import pytz
-from metaboatrace.models.stadium import EventHoldingStatus
+from metaboatrace.models.stadium import EventHoldingStatus, StadiumTelCode
 
 from metaboatrace.crawlers.celery import app
 from metaboatrace.crawlers.official.website.v1707.race import (
@@ -30,6 +30,20 @@ app.task(crawl_race_information_page)
 app.task(crawl_race_before_information_page)
 app.task(crawl_trifecta_odds_page)
 app.task(crawl_race_result_page)
+
+
+def _generate_identifier_str(
+    race_holding_date: date, stadium_tel_code: StadiumTelCode, race_number: int
+) -> str:
+    return f"{race_holding_date.strftime('%Y%m%d')}{str(stadium_tel_code.value).zfill(2)}{str(race_number).zfill(2)}"
+
+
+def _generate_crawl_race_task_id(
+    func_name: str, race_holding_date: date, stadium_tel_code: StadiumTelCode, race_number: int
+) -> str:
+    return (
+        f"{func_name}_{_generate_identifier_str(race_holding_date, stadium_tel_code, race_number)}"
+    )
 
 
 @app.task
@@ -77,18 +91,42 @@ def reserve_crawl_task_for_races_today() -> None:
             crawl_race_information_page.apply_async(  # type: ignore
                 args=[race.stadium_tel_code, race.date, race.race_number],
                 eta=race.betting_deadline_at - timedelta(minutes=15),
+                task_id=_generate_crawl_race_task_id(
+                    crawl_race_information_page.__name__,
+                    race.date,
+                    race.stadium_tel_code,
+                    race.race_number,
+                ),
             )
             crawl_race_before_information_page.apply_async(  # type: ignore
                 args=[race.stadium_tel_code, race.date, race.race_number],
                 eta=race.betting_deadline_at - timedelta(minutes=10),
+                task_id=_generate_crawl_race_task_id(
+                    crawl_race_before_information_page.__name__,
+                    race.date,
+                    race.stadium_tel_code,
+                    race.race_number,
+                ),
             )
             crawl_trifecta_odds_page.apply_async(  # type: ignore
                 args=[race.stadium_tel_code, race.date, race.race_number],
                 eta=race.betting_deadline_at - timedelta(minutes=5),
+                task_id=_generate_crawl_race_task_id(
+                    crawl_trifecta_odds_page.__name__,
+                    race.date,
+                    race.stadium_tel_code,
+                    race.race_number,
+                ),
             )
             crawl_race_result_page.apply_async(  # type: ignore
                 args=[race.stadium_tel_code, race.date, race.race_number],
                 eta=race.betting_deadline_at + timedelta(minutes=10),
+                task_id=_generate_crawl_race_task_id(
+                    crawl_race_result_page.__name__,
+                    race.date,
+                    race.stadium_tel_code,
+                    race.race_number,
+                ),
             )
     finally:
         session.close()
