@@ -9,7 +9,7 @@
 
 1. `brew install postgresql` (`psycopg2` をビルドするために `pg_config` コマンドが必要で、これは通常 PostgreSQL をインストールすれば入る)
 
-1. `rye sync`
+1. `rye sync` (`psycopg2` がインストールできないなら `psycopg2-binary` を代用可能)
 
 1. `docker-compose up`
 
@@ -21,4 +21,6 @@
 
 1. `python -m celery -A metaboatrace worker --loglevel=info`
 
-1. `python -m celery -A metaboatrace flower`
+1. `python -m celery -A metaboatrace flower` (管理画面)
+
+1. `python -m celery -A metaboatrace beat` (定期実行)
