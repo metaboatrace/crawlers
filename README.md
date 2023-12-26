@@ -19,8 +19,8 @@
 
 1. `python scripts/initialize_master_data.py` を実行して初期データをインポート
 
-1. `python -m celery -A metaboatrace worker --loglevel=info`
+1. `python -m celery -A metaboatrace.crawlers worker --loglevel=info`
 
-1. `python -m celery -A metaboatrace flower` (管理画面)
+1. `python -m celery -A metaboatrace.crawlers flower` (管理画面)
 
-1. `python -m celery -A metaboatrace beat` (定期実行)
+1. `python -m celery -A metaboatrace.crawlers beat` (定期実行)
