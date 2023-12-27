@@ -9,7 +9,7 @@
 
 1. `brew install postgresql` (`psycopg2` をビルドするために `pg_config` コマンドが必要で、これは通常 PostgreSQL をインストールすれば入る)
 
-1. `rye sync` (`psycopg2` がインストールできないなら `psycopg2-binary` を代用可能)
+1. `rye sync`
 
 1. `docker-compose up`
 
@@ -24,3 +24,13 @@
 1. `python -m celery -A metaboatrace.crawlers flower` (管理画面)
 
 1. `python -m celery -A metaboatrace.crawlers beat` (定期実行)
+
+## トラブルシューティング
+
+### `psycopg2` がインストールできない
+
+- `psycopg2-binary` を代用可能
+
+### Celery で `+[NSCharacterSet initialize] may have been in progress in another thread when fork() was called.` のようなエラーが出る
+
+- `export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES` のように環境変数を設定してからワーカーや beat を起動する
