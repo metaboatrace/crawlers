@@ -136,10 +136,12 @@ def reserve_crawl_task_for_races_today() -> None:
 def enqueue_incomplete_racer_crawling() -> None:
     session = Session()
     try:
-        incomplete_racers = session.query(Racer).filter(Racer.last_name == "").limit(3).all()
+        incomplete_racers = session.query(Racer).filter(Racer.status == None).limit(3).all()
 
-        for racer in incomplete_racers:
-            crawl_racer_from_racer_profile_page(int(racer.registration_number))
+        racer_registration_numbers = [racer.registration_number for racer in incomplete_racers]
+
+        for registration_number in racer_registration_numbers:
+            crawl_racer_from_racer_profile_page(int(registration_number))
 
     finally:
         session.close()
