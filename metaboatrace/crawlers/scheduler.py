@@ -25,9 +25,10 @@ jst = pytz.timezone("Asia/Tokyo")
 
 
 def _generate_identifier_str(
-    race_holding_date: date, stadium_tel_code: StadiumTelCode, race_number: int
+    race_holding_date: date, stadium_tel_code: int, race_number: int
 ) -> str:
-    return f"{race_holding_date.strftime('%Y%m%d')}{str(stadium_tel_code.value).zfill(2)}{str(race_number).zfill(2)}"
+    # note: ORM のモデルの属性を引数に使うので、 stadium_tel_code は int
+    return f"{race_holding_date.strftime('%Y%m%d')}{str(stadium_tel_code).zfill(2)}{str(race_number).zfill(2)}"
 
 
 def _generate_crawl_race_task_id(
