@@ -22,10 +22,12 @@ from metaboatrace.scrapers.official.website.v1707.pages.pre_inspection_informati
     extract_racers,
 )
 
+from metaboatrace.crawlers.celery import app
 from metaboatrace.crawlers.utils import fetch_html_as_io
 from metaboatrace.repositories import EventRepository, MotorRenewalRepository, RacerRepository
 
 
+@app.task
 def crawl_events_from_monthly_schedule_page(
     year: int, month: int, repository: EventRepository = EventRepository()
 ) -> None:
@@ -35,6 +37,7 @@ def crawl_events_from_monthly_schedule_page(
     repository.create_or_update_many(events)
 
 
+@app.task
 def crawl_pre_inspection_information_page(
     stadium_tel_code: int, date: date, racer_repository: RacerRepository = RacerRepository()
 ) -> None:
@@ -54,6 +57,7 @@ def crawl_pre_inspection_information_page(
 
 
 # TODO: インターフェースが他と明らかに不揃いなのでメソッド名を変えるかなんかして対応
+@app.task
 def crawl_event_holding_page(date: date) -> list[EventHolding]:
     url = create_event_holding_page_url(date)
     html_io = fetch_html_as_io(url)

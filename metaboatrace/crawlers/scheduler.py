@@ -23,14 +23,6 @@ from metaboatrace.orm.models import Race, Racer
 
 jst = pytz.timezone("Asia/Tokyo")
 
-# HACK: @app.task デコレータを関数定義時に適用することが一般的だが、名前空間パッケージを使ってる兼ね合いからかエラーになるのでここでデコレート
-app.task(crawl_events_from_monthly_schedule_page)
-app.task(crawl_all_race_information_for_date_and_stadiums)
-app.task(crawl_race_information_page)
-app.task(crawl_race_before_information_page)
-app.task(crawl_trifecta_odds_page)
-app.task(crawl_race_result_page)
-
 
 def _generate_identifier_str(
     race_holding_date: date, stadium_tel_code: StadiumTelCode, race_number: int
