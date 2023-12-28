@@ -3,6 +3,7 @@ from datetime import date, datetime, timedelta
 
 import pytz
 from metaboatrace.models.stadium import EventHoldingStatus, StadiumTelCode
+from metaboatrace.scrapers.official.website.exceptions import DataNotFound
 
 from metaboatrace.crawlers.celery import app
 from metaboatrace.crawlers.official.website.v1707.race import (
@@ -20,6 +21,7 @@ from metaboatrace.crawlers.official.website.v1707.stadium import (
 )
 from metaboatrace.orm.database import Session
 from metaboatrace.orm.models import Race, Racer
+from metaboatrace.repositories.racer import RacerRepository
 
 jst = pytz.timezone("Asia/Tokyo")
 
@@ -134,7 +136,11 @@ def enqueue_incomplete_racer_crawling() -> None:
         racer_registration_numbers = [racer.registration_number for racer in incomplete_racers]
 
         for registration_number in racer_registration_numbers:
-            crawl_racer_from_racer_profile_page(int(registration_number))
+            try:
+                crawl_racer_from_racer_profile_page(int(registration_number))
+            except DataNotFound:
+                repository = RacerRepository()
+                repository.make_retired(registration_number)
 
     finally:
         session.close()
