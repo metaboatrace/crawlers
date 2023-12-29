@@ -19,7 +19,7 @@ app.conf.beat_schedule = {
     },
     "crawl-all-race-information-daily": {
         "task": "metaboatrace.crawlers.scheduler.schedule_crawl_all_race_information_for_today",
-        "schedule": crontab(hour=23, minute=0),
+        "schedule": crontab(hour=22, minute=45),
     },
     "crawl-events-starting-today-daily": {
         "task": "metaboatrace.crawlers.scheduler.schedule_crawl_events_starting_today_for_today",

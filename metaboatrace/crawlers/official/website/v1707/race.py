@@ -40,6 +40,7 @@ from metaboatrace.scrapers.official.website.v1707.pages.race.result_page.scrapin
     extract_weather_condition as extract_weather_condition_in_performance,
 )
 
+from metaboatrace.crawlers.celery import app
 from metaboatrace.crawlers.exceptions import IncompleteDataError
 from metaboatrace.crawlers.utils import fetch_html_as_io
 from metaboatrace.repositories import (
@@ -73,6 +74,7 @@ def _create_boat_setting_from(race_entry: RaceEntry) -> BoatSetting:
     )
 
 
+@app.task
 def crawl_race_information_page(stadium_tel_code: int, date: date, race_number: int) -> None:
     url = create_race_entry_page_url(date, StadiumTelCode(stadium_tel_code), race_number)
     html_io = fetch_html_as_io(url)
@@ -107,6 +109,7 @@ def crawl_race_information_page(stadium_tel_code: int, date: date, race_number: 
 
 # HACK: 型に統一性がない
 # stadium_tel_code 系の引数の型が int だったり StadiumTelCode だったりするのはサーバーレスアーキテクチャ採用時の名残
+@app.task
 def crawl_all_race_information_for_date_and_stadiums(
     date: date, stadium_tel_codes: list[StadiumTelCode]
 ) -> None:
@@ -122,6 +125,7 @@ def crawl_all_race_information_for_date_and_stadiums(
                 )
 
 
+@app.task
 def crawl_race_before_information_page(stadium_tel_code: int, date: date, race_number: int) -> None:
     url = create_race_before_information_page_url(
         date, StadiumTelCode(stadium_tel_code), race_number
@@ -178,6 +182,7 @@ def crawl_race_before_information_page(stadium_tel_code: int, date: date, race_n
     weather_condition_repository.create_or_update(weather_condition)
 
 
+@app.task
 def crawl_trifecta_odds_page(stadium_tel_code: int, date: date, race_number: int) -> None:
     url = create_odds_page_url(date, StadiumTelCode(stadium_tel_code), race_number)
     html_io = fetch_html_as_io(url)
@@ -186,6 +191,7 @@ def crawl_trifecta_odds_page(stadium_tel_code: int, date: date, race_number: int
     odds_repository.create_or_update_many(odds)
 
 
+@app.task
 def crawl_race_result_page(stadium_tel_code: int, date: date, race_number: int) -> None:
     url = create_race_result_page_url(date, StadiumTelCode(stadium_tel_code), race_number)
     html_io = fetch_html_as_io(url)

@@ -3,6 +3,7 @@ from datetime import date, datetime, timedelta
 
 import pytz
 from metaboatrace.models.stadium import EventHoldingStatus, StadiumTelCode
+from metaboatrace.scrapers.official.website.exceptions import DataNotFound
 
 from metaboatrace.crawlers.celery import app
 from metaboatrace.crawlers.official.website.v1707.race import (
@@ -20,22 +21,16 @@ from metaboatrace.crawlers.official.website.v1707.stadium import (
 )
 from metaboatrace.orm.database import Session
 from metaboatrace.orm.models import Race, Racer
+from metaboatrace.repositories.racer import RacerRepository
 
 jst = pytz.timezone("Asia/Tokyo")
 
-# HACK: @app.task デコレータを関数定義時に適用することが一般的だが、名前空間パッケージを使ってる兼ね合いからかエラーになるのでここでデコレート
-app.task(crawl_events_from_monthly_schedule_page)
-app.task(crawl_all_race_information_for_date_and_stadiums)
-app.task(crawl_race_information_page)
-app.task(crawl_race_before_information_page)
-app.task(crawl_trifecta_odds_page)
-app.task(crawl_race_result_page)
-
 
 def _generate_identifier_str(
-    race_holding_date: date, stadium_tel_code: StadiumTelCode, race_number: int
+    race_holding_date: date, stadium_tel_code: int, race_number: int
 ) -> str:
-    return f"{race_holding_date.strftime('%Y%m%d')}{str(stadium_tel_code.value).zfill(2)}{str(race_number).zfill(2)}"
+    # note: ORM のモデルの属性を引数に使うので、 stadium_tel_code は int
+    return f"{race_holding_date.strftime('%Y%m%d')}{str(stadium_tel_code).zfill(2)}{str(race_number).zfill(2)}"
 
 
 def _generate_crawl_race_task_id(
@@ -141,7 +136,11 @@ def enqueue_incomplete_racer_crawling() -> None:
         racer_registration_numbers = [racer.registration_number for racer in incomplete_racers]
 
         for registration_number in racer_registration_numbers:
-            crawl_racer_from_racer_profile_page(int(registration_number))
+            try:
+                crawl_racer_from_racer_profile_page(int(registration_number))
+            except DataNotFound:
+                repository = RacerRepository()
+                repository.make_retired(registration_number)
 
     finally:
         session.close()
