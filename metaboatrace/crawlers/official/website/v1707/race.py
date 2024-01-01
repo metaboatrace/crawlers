@@ -22,6 +22,7 @@ from metaboatrace.scrapers.official.website.v1707.pages.race.entry_page.scraping
     extract_motor_performances,
     extract_race_entries,
     extract_race_information,
+    extract_racer_performances,
 )
 from metaboatrace.scrapers.official.website.v1707.pages.race.odds.trifecta_page.location import (
     create_odds_page_url,
@@ -56,6 +57,7 @@ from metaboatrace.repositories import (
     RacerConditionRepository,
     RaceRecordRepository,
     RaceRepository,
+    RacerWinningRateAggregationRepository,
     StartExhibitionRecordRepository,
     WeatherConditionRepository,
     WinningRaceEntryRepository,
@@ -105,6 +107,11 @@ def crawl_race_information_page(stadium_tel_code: int, date: date, race_number: 
         MotorBettingContributeRateAggregationRepository()
     )
     motor_betting_contribute_rate_aggregation_repository.create_or_update_many(motor_performances)
+
+    html_io.seek(0)
+    racer_performances = extract_racer_performances(html_io)
+    racer_winning_rate_aggregation_repository = RacerWinningRateAggregationRepository()
+    racer_winning_rate_aggregation_repository.create_or_update_many(racer_performances)
 
 
 # HACK: 型に統一性がない
