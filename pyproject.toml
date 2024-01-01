@@ -6,8 +6,8 @@ authors = [
     { name = "k0kishima", email = "okishimaxyz@gmail.com" }
 ]
 dependencies = [
-    "metaboatrace.models>=2.1.5",
-    "metaboatrace.scrapers>=3.0.7",
+    "metaboatrace.models>=2.1.6",
+    "metaboatrace.scrapers>=3.1.0",
     "requests>=2.31.0",
     "types-requests>=2.31.0.2",
     "SQLAlchemy>=2.0.23",

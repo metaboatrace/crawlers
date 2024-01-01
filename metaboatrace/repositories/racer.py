@@ -3,10 +3,14 @@ from typing import Any
 
 from metaboatrace.models.racer import Racer as RacerEntity
 from metaboatrace.models.racer import RacerCondition as RacerConditionEntity
+from metaboatrace.models.racer import RacerPerformance as RacerPerformanceEntity
 
 from metaboatrace.orm.database import Session
 from metaboatrace.orm.models.racer import Racer as RacerOrm
 from metaboatrace.orm.models.racer import RacerCondition as RacerConditionOrm
+from metaboatrace.orm.models.racer import (
+    RacerWinningRateAggregation as RacerWinningRateAggregationOrm,
+)
 from metaboatrace.orm.strategies.upsert import create_upsert_strategy
 
 from .base import Repository
@@ -132,6 +136,41 @@ class RacerConditionRepository(Repository[RacerConditionEntity]):
         return upsert_strategy(
             session,
             RacerConditionOrm,
+            values,
+            on_duplicate_key_update,
+        )
+
+
+def _transform_racer_performance_entity(
+    entity: RacerPerformanceEntity,
+) -> dict[str, Any]:
+    return {
+        "racer_registration_number": entity.racer_registration_number,
+        "aggregated_on": entity.aggregated_on,
+        "rate_in_all_stadium": entity.rate_in_all_stadium,
+        "rate_in_event_going_stadium": entity.rate_in_event_going_stadium,
+    }
+
+
+class RacerWinningRateAggregationRepository(Repository[RacerPerformanceEntity]):
+    def create_or_update(self, entity: RacerPerformanceEntity) -> bool:
+        return self.create_or_update_many(
+            [entity], ["rate_in_all_stadium", "rate_in_event_going_stadium"]
+        )
+
+    def create_or_update_many(
+        self,
+        data: list[RacerPerformanceEntity],
+        on_duplicate_key_update: list[str] = ["rate_in_all_stadium", "rate_in_event_going_stadium"],
+    ) -> bool:
+        values = [_transform_racer_performance_entity(entity) for entity in data]
+
+        upsert_strategy = create_upsert_strategy()
+        session = Session()
+
+        return upsert_strategy(
+            session,
+            RacerWinningRateAggregationOrm,
             values,
             on_duplicate_key_update,
         )
