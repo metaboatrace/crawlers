@@ -115,7 +115,7 @@ def reserve_crawl_task_for_races_today() -> None:
             )
             crawl_race_result_page.apply_async(  # type: ignore
                 args=[race.stadium_tel_code, race.date, race.race_number],
-                eta=race.betting_deadline_at + timedelta(minutes=10),
+                eta=race.betting_deadline_at + timedelta(minutes=20),
                 task_id=_generate_crawl_race_task_id(
                     crawl_race_result_page.__name__,
                     race.date,
