@@ -41,6 +41,21 @@ def _generate_crawl_race_task_id(
     )
 
 
+def _schedule_race_tasks(race: Race, tasks_with_timedelta) -> None:  # type: ignore
+    for task_func, delta in tasks_with_timedelta:
+        eta = race.betting_deadline_at + delta
+        task_func.apply_async(
+            args=[race.stadium_tel_code, race.date, race.race_number],
+            eta=eta,
+            task_id=_generate_crawl_race_task_id(
+                task_func.__name__,
+                race.date,  # type: ignore
+                race.stadium_tel_code,
+                race.race_number,  # type: ignore
+            ),
+        )
+
+
 @app.task
 def schedule_crawl_events_from_monthly_schedule_page() -> None:
     now = datetime.now()
@@ -82,47 +97,15 @@ def reserve_crawl_task_for_races_today() -> None:
         if not races_today:
             raise ValueError("No races found for the specified date")
 
+        tasks_with_timedelta = [
+            (crawl_race_information_page, timedelta(minutes=-15)),
+            (crawl_race_before_information_page, timedelta(minutes=-10)),
+            (crawl_trifecta_odds_page, timedelta(minutes=-5)),
+            (crawl_race_result_page, timedelta(minutes=20)),
+        ]
+
         for race in races_today:
-            crawl_race_information_page.apply_async(  # type: ignore
-                args=[race.stadium_tel_code, race.date, race.race_number],
-                eta=race.betting_deadline_at - timedelta(minutes=15),
-                task_id=_generate_crawl_race_task_id(
-                    crawl_race_information_page.__name__,
-                    race.date,
-                    race.stadium_tel_code,
-                    race.race_number,
-                ),
-            )
-            crawl_race_before_information_page.apply_async(  # type: ignore
-                args=[race.stadium_tel_code, race.date, race.race_number],
-                eta=race.betting_deadline_at - timedelta(minutes=10),
-                task_id=_generate_crawl_race_task_id(
-                    crawl_race_before_information_page.__name__,
-                    race.date,
-                    race.stadium_tel_code,
-                    race.race_number,
-                ),
-            )
-            crawl_trifecta_odds_page.apply_async(  # type: ignore
-                args=[race.stadium_tel_code, race.date, race.race_number],
-                eta=race.betting_deadline_at - timedelta(minutes=5),
-                task_id=_generate_crawl_race_task_id(
-                    crawl_trifecta_odds_page.__name__,
-                    race.date,
-                    race.stadium_tel_code,
-                    race.race_number,
-                ),
-            )
-            crawl_race_result_page.apply_async(  # type: ignore
-                args=[race.stadium_tel_code, race.date, race.race_number],
-                eta=race.betting_deadline_at + timedelta(minutes=20),
-                task_id=_generate_crawl_race_task_id(
-                    crawl_race_result_page.__name__,
-                    race.date,
-                    race.stadium_tel_code,
-                    race.race_number,
-                ),
-            )
+            _schedule_race_tasks(race, tasks_with_timedelta)
     finally:
         session.close()
 
@@ -140,7 +123,7 @@ def enqueue_incomplete_racer_crawling() -> None:
                 crawl_racer_from_racer_profile_page(int(registration_number))
             except DataNotFound:
                 repository = RacerRepository()
-                repository.make_retired(registration_number)
+                repository.make_retired(registration_number)  # type: ignore
 
     finally:
         session.close()
