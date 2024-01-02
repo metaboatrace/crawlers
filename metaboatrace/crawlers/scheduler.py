@@ -2,8 +2,8 @@ import time
 from datetime import date, datetime, timedelta
 
 import pytz
-from metaboatrace.models.stadium import EventHoldingStatus, StadiumTelCode
-from metaboatrace.scrapers.official.website.exceptions import DataNotFound
+from metaboatrace.models.stadium import EventHoldingStatus
+from metaboatrace.scrapers.official.website.exceptions import DataNotFound, RaceCanceled
 
 from metaboatrace.crawlers.celery import app
 from metaboatrace.crawlers.official.website.v1707.race import (
@@ -21,7 +21,7 @@ from metaboatrace.crawlers.official.website.v1707.stadium import (
 )
 from metaboatrace.orm.database import Session
 from metaboatrace.orm.models import Race, Racer
-from metaboatrace.repositories.racer import RacerRepository
+from metaboatrace.repositories import RaceRepository, RacerRepository
 
 jst = pytz.timezone("Asia/Tokyo")
 
@@ -34,11 +34,42 @@ def _generate_identifier_str(
 
 
 def _generate_crawl_race_task_id(
-    func_name: str, race_holding_date: date, stadium_tel_code: StadiumTelCode, race_number: int
+    func_name: str, race_holding_date: date, stadium_tel_code: int, race_number: int
 ) -> str:
     return (
         f"{func_name}_{_generate_identifier_str(race_holding_date, stadium_tel_code, race_number)}"
     )
+
+
+def _revoke_future_race_tasks(
+    stadium_tel_code: int, race_opened_on: date, start_race_number: int
+) -> None:
+    tasks = [
+        crawl_race_information_page,
+        crawl_race_before_information_page,
+        crawl_trifecta_odds_page,
+        crawl_race_result_page,
+    ]
+
+    for n in range(start_race_number, 13):
+        for task in tasks:
+            task_id = _generate_crawl_race_task_id(
+                task.__name__, race_opened_on, stadium_tel_code, n
+            )
+            app.control.revoke(task_id, terminate=True)
+
+
+@app.task(bind=True)
+def _race_task_failure_handler(self, exc, task_id, args, kwargs, einfo):  # type: ignore
+    if isinstance(exc, RaceCanceled):
+        stadium_tel_code, race_opened_on, race_number = args
+
+        repository = RaceRepository()
+        repository.cancel(stadium_tel_code, race_opened_on, race_number)
+
+        _revoke_future_race_tasks(stadium_tel_code, race_opened_on, race_number)
+    else:
+        raise exc
 
 
 def _schedule_race_tasks(race: Race, tasks_with_timedelta) -> None:  # type: ignore
@@ -50,9 +81,10 @@ def _schedule_race_tasks(race: Race, tasks_with_timedelta) -> None:  # type: ign
             task_id=_generate_crawl_race_task_id(
                 task_func.__name__,
                 race.date,  # type: ignore
-                race.stadium_tel_code,
+                race.stadium_tel_code,  # type: ignore
                 race.race_number,  # type: ignore
             ),
+            link_error=_race_task_failure_handler.s(),
         )
 
 
