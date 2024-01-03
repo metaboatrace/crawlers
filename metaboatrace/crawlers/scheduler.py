@@ -6,6 +6,7 @@ from metaboatrace.models.stadium import EventHoldingStatus
 from metaboatrace.scrapers.official.website.exceptions import DataNotFound, RaceCanceled
 
 from metaboatrace.crawlers.celery import app
+from metaboatrace.crawlers.exceptions import RaceDeadlineChanged
 from metaboatrace.crawlers.official.website.v1707.race import (
     crawl_all_race_information_for_date_and_stadiums,
     crawl_race_before_information_page,
@@ -41,9 +42,7 @@ def _generate_crawl_race_task_id(
     )
 
 
-def _revoke_future_race_tasks(
-    stadium_tel_code: int, race_opened_on: date, start_race_number: int
-) -> None:
+def _revoke_race_tasks(stadium_tel_code: int, race_opened_on: date, race_number: int) -> None:
     tasks = [
         crawl_race_information_page,
         crawl_race_before_information_page,
@@ -51,23 +50,40 @@ def _revoke_future_race_tasks(
         crawl_race_result_page,
     ]
 
+    for task in tasks:
+        task_id = _generate_crawl_race_task_id(
+            task.__name__, race_opened_on, stadium_tel_code, race_number
+        )
+        app.control.revoke(task_id, terminate=True)
+
+
+def _revoke_future_race_tasks(
+    stadium_tel_code: int, race_opened_on: date, start_race_number: int
+) -> None:
     for n in range(start_race_number, 13):
-        for task in tasks:
-            task_id = _generate_crawl_race_task_id(
-                task.__name__, race_opened_on, stadium_tel_code, n
-            )
-            app.control.revoke(task_id, terminate=True)
+        _revoke_race_tasks(stadium_tel_code, race_opened_on, n)
 
 
 @app.task(bind=True)
 def _race_task_failure_handler(self, exc, task_id, args, kwargs, einfo):  # type: ignore
-    if isinstance(exc, RaceCanceled):
-        stadium_tel_code, race_opened_on, race_number = args
+    stadium_tel_code, race_opened_on, race_number = args
+    repository = RaceRepository()
 
-        repository = RaceRepository()
+    if isinstance(exc, RaceCanceled):
         repository.cancel(stadium_tel_code, race_opened_on, race_number)
 
         _revoke_future_race_tasks(stadium_tel_code, race_opened_on, race_number)
+    elif isinstance(exc, RaceDeadlineChanged):
+        race = repository.find_by_key(stadium_tel_code, race_opened_on, race_number)
+        if race is not None:
+            _revoke_race_tasks(stadium_tel_code, race_opened_on, race_number)
+            tasks_with_timedelta = [
+                (crawl_race_before_information_page, timedelta(minutes=-10)),
+                (crawl_trifecta_odds_page, timedelta(minutes=-5)),
+                (crawl_race_result_page, timedelta(minutes=20)),
+            ]
+            _schedule_race_tasks(race, tasks_with_timedelta)
+
     else:
         raise exc
 
