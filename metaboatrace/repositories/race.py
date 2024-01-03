@@ -73,6 +73,14 @@ class RaceRepository(Repository[RaceEntity]):
         finally:
             session.close()
 
+    def find_all_by_date(self, date: date) -> list[RaceEntity]:
+        session = Session()
+        try:
+            race_orms = session.query(RaceOrm).filter_by(date=date).all()
+            return [_race_orm_to_entity(race_orm) for race_orm in race_orms]
+        finally:
+            session.close()
+
     def create_or_update(self, entity: RaceEntity) -> bool:
         return self.create_or_update_many(
             [entity],
