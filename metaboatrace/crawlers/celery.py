@@ -1,7 +1,11 @@
 from celery import Celery
 from celery.schedules import crontab
 
-app = Celery("metaboatrace.crawlers", broker="redis://localhost:6379/0")
+app = Celery(
+    "metaboatrace.crawlers",
+    broker="redis://localhost:6379/0",
+    include=["metaboatrace.crawlers.scheduler"],
+)
 app.conf.timezone = "UTC"
 
 # note: 可読性からJSTで定義して、設定時はUTCに変更していたが、これだと毎回計算が実行されオーバヘッドになるので静的に定義
@@ -15,7 +19,7 @@ app.conf.beat_schedule = {
     },
     "crawl-all-race-information-daily": {
         "task": "metaboatrace.crawlers.scheduler.schedule_crawl_all_race_information_for_today",
-        "schedule": crontab(hour=23, minute=0),
+        "schedule": crontab(hour=22, minute=45),
     },
     "crawl-events-starting-today-daily": {
         "task": "metaboatrace.crawlers.scheduler.schedule_crawl_events_starting_today_for_today",

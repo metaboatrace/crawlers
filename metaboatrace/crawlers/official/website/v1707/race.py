@@ -19,6 +19,7 @@ from metaboatrace.scrapers.official.website.v1707.pages.race.entry_page.scraping
     extract_motor_performances,
     extract_race_entries,
     extract_race_information,
+    extract_racer_performances,
 )
 from metaboatrace.scrapers.official.website.v1707.pages.race.odds.trifecta_page.scraping import (
     extract_odds,
@@ -31,7 +32,8 @@ from metaboatrace.scrapers.official.website.v1707.pages.race.result_page.scrapin
     extract_weather_condition as extract_weather_condition_in_performance,
 )
 
-from metaboatrace.crawlers.exceptions import IncompleteDataError
+from metaboatrace.crawlers.celery import app
+from metaboatrace.crawlers.exceptions import IncompleteDataError, RaceDeadlineChanged
 from metaboatrace.crawlers.official.website.v1707.proxy import (
     create_odds_page_url,
     create_race_before_information_page_url,
@@ -52,6 +54,7 @@ from metaboatrace.repositories import (
     RacerConditionRepository,
     RaceRecordRepository,
     RaceRepository,
+    RacerWinningRateAggregationRepository,
     StartExhibitionRecordRepository,
     WeatherConditionRepository,
     WinningRaceEntryRepository,
@@ -70,11 +73,14 @@ def _create_boat_setting_from(race_entry: RaceEntry) -> BoatSetting:
     )
 
 
+@app.task
 def crawl_race_information_page(stadium_tel_code: int, date: date, race_number: int) -> None:
+    race_repository = RaceRepository()
+    persisted_race = race_repository.find_by_key(stadium_tel_code, date, race_number)
+
     url = create_race_entry_page_url(date, StadiumTelCode(stadium_tel_code), race_number)
     html_io = fetch_html_as_io(url)
     race = extract_race_information(html_io)
-    race_repository = RaceRepository()
     race_repository.create_or_update(race)
 
     html_io.seek(0)
@@ -101,9 +107,18 @@ def crawl_race_information_page(stadium_tel_code: int, date: date, race_number: 
     )
     motor_betting_contribute_rate_aggregation_repository.create_or_update_many(motor_performances)
 
+    html_io.seek(0)
+    racer_performances = extract_racer_performances(html_io)
+    racer_winning_rate_aggregation_repository = RacerWinningRateAggregationRepository()
+    racer_winning_rate_aggregation_repository.create_or_update_many(racer_performances)
+
+    if persisted_race is not None and persisted_race.deadline_at != race.deadline_at:
+        raise RaceDeadlineChanged
+
 
 # HACK: 型に統一性がない
 # stadium_tel_code 系の引数の型が int だったり StadiumTelCode だったりするのはサーバーレスアーキテクチャ採用時の名残
+@app.task
 def crawl_all_race_information_for_date_and_stadiums(
     date: date, stadium_tel_codes: list[StadiumTelCode]
 ) -> None:
@@ -119,6 +134,7 @@ def crawl_all_race_information_for_date_and_stadiums(
                 )
 
 
+@app.task
 def crawl_race_before_information_page(stadium_tel_code: int, date: date, race_number: int) -> None:
     url = create_race_before_information_page_url(
         date, StadiumTelCode(stadium_tel_code), race_number
@@ -175,6 +191,7 @@ def crawl_race_before_information_page(stadium_tel_code: int, date: date, race_n
     weather_condition_repository.create_or_update(weather_condition)
 
 
+@app.task
 def crawl_trifecta_odds_page(stadium_tel_code: int, date: date, race_number: int) -> None:
     url = create_odds_page_url(date, StadiumTelCode(stadium_tel_code), race_number)
     html_io = fetch_html_as_io(url)
@@ -183,6 +200,7 @@ def crawl_trifecta_odds_page(stadium_tel_code: int, date: date, race_number: int
     odds_repository.create_or_update_many(odds)
 
 
+@app.task
 def crawl_race_result_page(stadium_tel_code: int, date: date, race_number: int) -> None:
     url = create_race_result_page_url(date, StadiumTelCode(stadium_tel_code), race_number)
     html_io = fetch_html_as_io(url)
