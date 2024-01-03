@@ -2,6 +2,7 @@ import time
 from datetime import date, datetime, timedelta
 
 import pytz
+from metaboatrace.models.race import RaceInformation as RaceEntity
 from metaboatrace.models.stadium import EventHoldingStatus
 from metaboatrace.scrapers.official.website.exceptions import DataNotFound, RaceCanceled
 
@@ -21,7 +22,7 @@ from metaboatrace.crawlers.official.website.v1707.stadium import (
     crawl_pre_inspection_information_page,
 )
 from metaboatrace.orm.database import Session
-from metaboatrace.orm.models import Race, Racer
+from metaboatrace.orm.models import Racer
 from metaboatrace.repositories import RaceRepository, RacerRepository
 
 jst = pytz.timezone("Asia/Tokyo")
@@ -35,11 +36,13 @@ def _generate_identifier_str(
 
 
 def _generate_crawl_race_task_id(
-    func_name: str, race_holding_date: date, stadium_tel_code: int, race_number: int
+    func_name: str,
+    race_holding_date: date,
+    stadium_tel_code: int,
+    race_number: int,
+    prefix: str = "",
 ) -> str:
-    return (
-        f"{func_name}_{_generate_identifier_str(race_holding_date, stadium_tel_code, race_number)}"
-    )
+    return f"{prefix}{func_name}_{_generate_identifier_str(race_holding_date, stadium_tel_code, race_number)}"
 
 
 def _revoke_race_tasks(stadium_tel_code: int, race_opened_on: date, race_number: int) -> None:
@@ -64,9 +67,9 @@ def _revoke_future_race_tasks(
         _revoke_race_tasks(stadium_tel_code, race_opened_on, n)
 
 
-@app.task(bind=True)
-def _race_task_failure_handler(self, exc, task_id, args, kwargs, einfo):  # type: ignore
-    stadium_tel_code, race_opened_on, race_number = args
+@app.task
+def _race_task_failure_handler(request, exc, traceback):  # type: ignore
+    stadium_tel_code, race_opened_on, race_number = request.args
     repository = RaceRepository()
 
     if isinstance(exc, RaceCanceled):
@@ -77,28 +80,32 @@ def _race_task_failure_handler(self, exc, task_id, args, kwargs, einfo):  # type
         race = repository.find_by_key(stadium_tel_code, race_opened_on, race_number)
         if race is not None:
             _revoke_race_tasks(stadium_tel_code, race_opened_on, race_number)
+
+            # note: 接頭辞つけないと revoke 対象のものと区別がつかない
+            # 結果、非同期処理のタイミング次第でリスケされたものが revoke されてしまいそうなので付加
             tasks_with_timedelta = [
                 (crawl_race_before_information_page, timedelta(minutes=-10)),
                 (crawl_trifecta_odds_page, timedelta(minutes=-5)),
                 (crawl_race_result_page, timedelta(minutes=20)),
             ]
-            _schedule_race_tasks(race, tasks_with_timedelta)
+            _schedule_race_tasks(race, tasks_with_timedelta, "rescheduled_")
 
     else:
         raise exc
 
 
-def _schedule_race_tasks(race: Race, tasks_with_timedelta) -> None:  # type: ignore
+def _schedule_race_tasks(race: RaceEntity, tasks_with_timedelta, prefix: str = "") -> None:  # type: ignore
     for task_func, delta in tasks_with_timedelta:
-        eta = race.betting_deadline_at + delta
+        eta = race.deadline_at + delta
         task_func.apply_async(
-            args=[race.stadium_tel_code, race.date, race.race_number],
+            args=[race.stadium_tel_code.value, race.race_holding_date, race.race_number],
             eta=eta,
             task_id=_generate_crawl_race_task_id(
                 task_func.__name__,
-                race.date,  # type: ignore
-                race.stadium_tel_code,  # type: ignore
-                race.race_number,  # type: ignore
+                race.race_holding_date,
+                race.stadium_tel_code.value,
+                race.race_number,
+                prefix,
             ),
             link_error=_race_task_failure_handler.s(),
         )
@@ -138,10 +145,10 @@ def schedule_crawl_events_starting_today_for_today() -> None:
 @app.task
 def reserve_crawl_task_for_races_today() -> None:
     try:
-        session = Session()
+        repository = RaceRepository()
         today = datetime.now(jst).date()
 
-        races_today = session.query(Race).filter(Race.date == today).all()
+        races_today = repository.find_all_by_date(today)
         if not races_today:
             raise ValueError("No races found for the specified date")
 
@@ -152,10 +159,11 @@ def reserve_crawl_task_for_races_today() -> None:
             (crawl_race_result_page, timedelta(minutes=20)),
         ]
 
-        for race in races_today:
-            _schedule_race_tasks(race, tasks_with_timedelta)
-    finally:
-        session.close()
+        for race_entity in races_today:
+            _schedule_race_tasks(race_entity, tasks_with_timedelta)
+    except Exception as e:
+        # todo: 必要あれば制御
+        raise e
 
 
 @app.task
