@@ -6,7 +6,7 @@ from metaboatrace.models.stadium import EventHoldingStatus
 from metaboatrace.scrapers.official.website.exceptions import DataNotFound, RaceCanceled
 from tqdm import tqdm
 
-from metaboatrace.crawlers.exceptions import IncompleteDataError
+from metaboatrace.crawlers.exceptions import IncompleteDataError, RaceDeadlineChanged
 from metaboatrace.crawlers.official.website.v1707.race import (
     crawl_race_before_information_page,
     crawl_race_information_page,
@@ -95,6 +95,8 @@ def _main() -> None:
                                     function=crawl_function.__name__
                                 )
                             )
+                        except RaceDeadlineChanged:
+                            pass
 
                         sleep(sleep_second)
                 except RaceCanceled:

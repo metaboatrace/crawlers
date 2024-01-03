@@ -42,7 +42,7 @@ from metaboatrace.scrapers.official.website.v1707.pages.race.result_page.scrapin
 )
 
 from metaboatrace.crawlers.celery import app
-from metaboatrace.crawlers.exceptions import IncompleteDataError
+from metaboatrace.crawlers.exceptions import IncompleteDataError, RaceDeadlineChanged
 from metaboatrace.crawlers.utils import fetch_html_as_io
 from metaboatrace.repositories import (
     BoatBettingContributeRateAggregationRepository,
@@ -78,10 +78,12 @@ def _create_boat_setting_from(race_entry: RaceEntry) -> BoatSetting:
 
 @app.task
 def crawl_race_information_page(stadium_tel_code: int, date: date, race_number: int) -> None:
+    race_repository = RaceRepository()
+    persisted_race = race_repository.find_by_key(stadium_tel_code, date, race_number)
+
     url = create_race_entry_page_url(date, StadiumTelCode(stadium_tel_code), race_number)
     html_io = fetch_html_as_io(url)
     race = extract_race_information(html_io)
-    race_repository = RaceRepository()
     race_repository.create_or_update(race)
 
     html_io.seek(0)
@@ -112,6 +114,9 @@ def crawl_race_information_page(stadium_tel_code: int, date: date, race_number: 
     racer_performances = extract_racer_performances(html_io)
     racer_winning_rate_aggregation_repository = RacerWinningRateAggregationRepository()
     racer_winning_rate_aggregation_repository.create_or_update_many(racer_performances)
+
+    if persisted_race is not None and persisted_race.deadline_at != race.deadline_at:
+        raise RaceDeadlineChanged
 
 
 # HACK: 型に統一性がない

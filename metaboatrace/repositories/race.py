@@ -1,5 +1,5 @@
 from datetime import date
-from typing import Any
+from typing import Any, Optional
 
 from metaboatrace.models.race import (
     CircumferenceExhibitionRecord as CircumferenceExhibitionRecordEntity,
@@ -11,6 +11,7 @@ from metaboatrace.models.race import RaceEntry as RaceEntryEntity
 from metaboatrace.models.race import RaceInformation as RaceEntity
 from metaboatrace.models.race import RaceRecord as RaceRecordEntity
 from metaboatrace.models.race import StartExhibitionRecord as StartExhibitionRecordEntity
+from metaboatrace.models.stadium import StadiumTelCode
 
 from metaboatrace.orm.database import Session
 from metaboatrace.orm.models.race import (
@@ -42,7 +43,36 @@ def _transform_race_entity(entity: RaceEntity) -> dict[str, Any]:
     }
 
 
+def _race_orm_to_entity(race_orm: RaceOrm) -> RaceEntity:
+    return RaceEntity(
+        race_holding_date=race_orm.date,
+        stadium_tel_code=StadiumTelCode(race_orm.stadium_tel_code),
+        race_number=race_orm.race_number,
+        title=race_orm.title,
+        number_of_laps=race_orm.number_of_laps,
+        deadline_at=race_orm.betting_deadline_at,
+        is_course_fixed=race_orm.is_course_fixed,
+        use_stabilizer=race_orm.is_stabilizer_used,
+    )
+
+
 class RaceRepository(Repository[RaceEntity]):
+    def find_by_key(
+        self, stadium_tel_code: int, date: date, race_number: int
+    ) -> Optional[RaceEntity]:
+        session = Session()
+        try:
+            race_orm = (
+                session.query(RaceOrm)
+                .filter_by(stadium_tel_code=stadium_tel_code, date=date, race_number=race_number)
+                .first()
+            )
+            if race_orm is not None:
+                return _race_orm_to_entity(race_orm)
+            return None
+        finally:
+            session.close()
+
     def create_or_update(self, entity: RaceEntity) -> bool:
         return self.create_or_update_many(
             [entity],
@@ -97,7 +127,7 @@ class RaceRepository(Repository[RaceEntity]):
                 )
                 session.add(race_orm)
             else:
-                race_orm.is_canceled = True
+                race_orm.is_canceled = True  # type: ignore
 
             session.commit()
             return True
