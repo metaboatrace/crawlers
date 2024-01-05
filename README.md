@@ -52,3 +52,7 @@ $ pg_dump -h 127.0.0.1 -p 55432 -U postgres -d metaboatrace_development -n publi
 ### Celery で `+[NSCharacterSet initialize] may have been in progress in another thread when fork() was called.` のようなエラーが出る
 
 - `export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES` のように環境変数を設定してからワーカーや beat を起動する
+
+### celery beat で `_dbm.error: cannot add item to database` というエラーが出る
+
+- `rm celerybeat-schedule.db` を実行して再起動する
