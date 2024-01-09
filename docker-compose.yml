@@ -1,4 +1,4 @@
-version: '3'
+version: '2.1'
 
 services:
   db:
@@ -7,13 +7,36 @@ services:
     environment:
       POSTGRES_PASSWORD: 'password'
       POSTGRES_DB: 'metaboatrace_development'
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - default
     ports:
       - '55432:5432'
+
   redis:
     image: redis:latest
     ports:
       - '6379:6379'
     networks:
       - default
+
+  hasura:
+    image: hasura/graphql-engine:v2.36.1
+    ports:
+      - '8080:8080'
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:password@db:5432/metaboatrace_development
+      HASURA_GRAPHQL_ENABLE_CONSOLE: 'true'
+    networks:
+      - default
+
+networks:
+  default:
+    driver: bridge
