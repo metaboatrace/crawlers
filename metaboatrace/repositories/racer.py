@@ -70,9 +70,9 @@ class RacerRepository(Repository[RacerEntity]):
                 "term": racer.term,
                 "birth_date": racer.birth_date,
                 "branch_id": racer.branch.value if racer.branch else None,
-                "birth_prefecture_id": racer.born_prefecture.value
-                if racer.born_prefecture
-                else None,
+                "birth_prefecture_id": (
+                    racer.born_prefecture.value if racer.born_prefecture else None
+                ),
                 "height": racer.height,
             }
             for racer in data
