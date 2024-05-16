@@ -54,7 +54,7 @@ def parse_args():  # type: ignore
     return parser.parse_args()
 
 
-def backup_database(backup_file: str) -> None:  # type: ignore
+def backup_database(backup_file: str, exclude_tables: bool = False) -> None:  # type: ignore
     if not os.path.exists(BACKUP_DIR):
         os.makedirs(BACKUP_DIR)
 
@@ -74,6 +74,9 @@ def backup_database(backup_file: str) -> None:  # type: ignore
         "-f",
         backup_file,
     ]
+
+    if exclude_tables:
+        pg_dump_command.extend(["--exclude-table=stadiums", "--exclude-table=racers"])
 
     logger.info(f"Backing up database to {backup_file}...")
     result = subprocess.run(pg_dump_command, capture_output=True, text=True)
@@ -117,7 +120,7 @@ def main() -> None:
     try:
         delete_data_outside_term(session, term_start, term_end)
         post_deletion_backup_file = os.path.join(BACKUP_DIR, f"{term_start}.dump")
-        backup_database(post_deletion_backup_file)
+        backup_database(post_deletion_backup_file, exclude_tables=True)
     except Exception as e:
         logger.error(f"An error occurred: {e}")
         session.rollback()
