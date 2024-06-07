@@ -48,7 +48,7 @@ iniconfig==2.0.0
     # via pytest
 kombu==5.3.4
     # via celery
-metaboatrace-models==2.1.6
+metaboatrace-models==2.2.6
     # via crawlers
     # via metaboatrace-scrapers
 metaboatrace-scrapers==3.2.0
