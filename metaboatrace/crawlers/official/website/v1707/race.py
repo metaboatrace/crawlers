@@ -163,6 +163,11 @@ def crawl_race_before_information_page(stadium_tel_code: int, date: date, race_n
 
     html_io.seek(0)
     circumference_exhibition_records = extract_circumference_exhibition_records(html_io)
+    if not circumference_exhibition_records:
+        # note: スタート展示は実施されたけど周回展示の時点で中止になることが稀にある
+        # https://boatrace.jp/owpc/pc/race/beforeinfo?rno=8&jcd=03&hd=20240322
+        raise RaceCanceled
+
     circumference_exhibition_record_repository = CircumferenceExhibitionRecordRepository()
     circumference_exhibition_record_repository.create_or_update_many(
         circumference_exhibition_records

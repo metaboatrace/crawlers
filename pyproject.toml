@@ -7,7 +7,7 @@ authors = [
 ]
 dependencies = [
     "metaboatrace.models>=2.2.6",
-    "metaboatrace.scrapers>=3.2.0",
+    "metaboatrace.scrapers>=3.3.0",
     "requests>=2.31.0",
     "types-requests>=2.31.0.2",
     "SQLAlchemy>=2.0.23",

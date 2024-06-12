@@ -51,7 +51,7 @@ kombu==5.3.4
 metaboatrace-models==2.2.6
     # via crawlers
     # via metaboatrace-scrapers
-metaboatrace-scrapers==3.2.0
+metaboatrace-scrapers==3.3.0
     # via crawlers
 numpy==1.25.2
     # via metaboatrace-scrapers
