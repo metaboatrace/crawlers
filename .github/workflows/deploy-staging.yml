@@ -1,0 +1,76 @@
+name: Deploy to Staging
+
+on:
+  workflow_dispatch: null
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+      actions: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4.0.2
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/metaboatrace-github-actions-role
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to AWS ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push proxy docker image
+        id: build-nginx-image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./deploy/proxy
+          push: true
+          tags: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/metaboatrace-crawler-proxy-ecr:latest
+
+      - name: Build and push app docker image
+        id: build-backend-image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./deploy/app/Dockerfile
+          push: true
+          tags: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/metaboatrace-crawler-app-ecr:latest
+
+      - name: Render task definition from template
+        id: render-task-def
+        run: envsubst < deploy/taskdef-template.json > taskdef.json
+        env:
+          PROXY_IMAGE_URI: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/metaboatrace-crawler-proxy-ecr:latest
+          APP_IMAGE_URI: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/metaboatrace-crawler-app-ecr:latest
+          PROJECT: metaboatrace
+          APP_ENV: staging
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      - name: Register ECS task definition
+        id: register-task-def
+        run: |
+          TASK_DEF_ARN=$(aws ecs register-task-definition \
+            --family mataboatrace-staging-crawler-ecs-task \
+            --execution-role-arn arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/metaboatrace-staging-ecs-task-execution-role \
+            --task-role-arn arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/metaboatrace-staging-ecs-task-role \
+            --cli-input-json file://taskdef.json \
+            --query 'taskDefinition.taskDefinitionArn' \
+            --output text)
+          echo "TASK_DEF_ARN=$TASK_DEF_ARN" >> $GITHUB_ENV
+
+      - name: Update ECS service
+        run: |
+          aws ecs update-service --cluster metaboatrace-staging-ecs-cluster --service metaboatrace-staging-crawler-ecs-service --task-definition ${{ env.TASK_DEF_ARN }} --force-new-deployment
