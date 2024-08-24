@@ -7,7 +7,6 @@
 #   all-features: false
 #   with-sources: false
 
--e file:.
 amqp==5.2.0
     # via kombu
 annotated-types==0.5.0
@@ -18,7 +17,6 @@ billiard==4.2.0
     # via celery
 black==23.7.0
 celery==5.3.6
-    # via crawlers
     # via flower
 certifi==2023.7.22
     # via requests
@@ -39,9 +37,7 @@ click-plugins==1.1.1
 click-repl==0.3.0
     # via celery
 cryptography==41.0.5
-    # via crawlers
 flower==2.0.1
-    # via crawlers
 humanize==4.9.0
     # via flower
 idna==3.4
@@ -51,10 +47,8 @@ iniconfig==2.0.0
 kombu==5.3.4
     # via celery
 metaboatrace-models==2.2.7
-    # via crawlers
     # via metaboatrace-scrapers
 metaboatrace-scrapers==3.3.1
-    # via crawlers
 mypy==1.7.0
 mypy-extensions==1.0.0
     # via black
@@ -75,7 +69,6 @@ prometheus-client==0.19.0
 prompt-toolkit==3.0.41
     # via click-repl
 psycopg2-binary==2.9.9
-    # via crawlers
 pycparser==2.21
     # via cffi
 pydantic==2.1.1
@@ -83,34 +76,26 @@ pydantic==2.1.1
 pydantic-core==2.4.0
     # via pydantic
 pymysql==1.1.0
-    # via crawlers
 pytest==7.4.3
     # via metaboatrace-scrapers
 python-dateutil==2.8.2
     # via celery
 pytz==2023.3.post1
-    # via crawlers
     # via flower
     # via metaboatrace-scrapers
 redis==5.0.1
-    # via crawlers
 requests==2.31.0
-    # via crawlers
 six==1.16.0
     # via python-dateutil
 soupsieve==2.4.1
     # via beautifulsoup4
 sqlalchemy==2.0.23
-    # via crawlers
 tornado==6.4
     # via flower
 tqdm==4.66.1
-    # via crawlers
 types-pytz==2023.3.1.1
-    # via crawlers
     # via metaboatrace-scrapers
 types-requests==2.31.0.2
-    # via crawlers
 types-urllib3==1.26.25.14
     # via types-requests
 typing-extensions==4.7.1

@@ -36,6 +36,7 @@ dev-dependencies = [
     "black>=23.7.0",
     "pytest>=7.4.0",
 ]
+virtual = true
 
 [tool.hatch.metadata]
 allow-direct-references = true
