@@ -1,19 +1,16 @@
 ## 動作環境
 
-- Python 3.11+
+- Python 3.13+
 - Node.js 18.17+
 - PostgreSQL 16.1+
 
 ## ローカル開発環境構築
 
-※ Mac (M2) MacOS 14.1.2（23B92）にて確認
+※ Mac (M4) MacOS 15.3（24D2059）にて確認
 
-1. `brew install postgresql@16`
+1. `uv sync`
 
-   1. `psycopg2` をビルドするために `pg_config` コマンドが必要で、これは通常 PostgreSQL をインストールすれば入る
-   1. インストール後に出力される `echo 'export PATH="/opt/homebrew/opt/curl/bin:$PATH"' >> ~/.zshrc` などを実行してパスも通す
-
-1. `rye sync`
+1. `source .venv/bin/activate`
 
 1. `docker-compose up`
 
