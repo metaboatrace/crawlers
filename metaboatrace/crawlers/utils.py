@@ -5,6 +5,9 @@ import requests
 
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 def fetch_html_as_io(url: str) -> io.StringIO:

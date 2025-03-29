@@ -89,3 +89,5 @@ override.tf.json
 *_override.tf.json
 
 celerybeat-schedule.db
+
+.env
