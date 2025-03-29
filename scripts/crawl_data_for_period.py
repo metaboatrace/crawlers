@@ -1,5 +1,5 @@
 import argparse
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from time import sleep
 
 from metaboatrace.models.stadium import EventHoldingStatus
@@ -22,7 +22,7 @@ from metaboatrace.repositories import RaceRepository
 from metaboatrace.crawlers.utils import send_slack_notification
 
 
-def _valid_end_date(s: str) -> datetime.date:
+def _valid_end_date(s: str) -> date:
     try:
         end_date = datetime.strptime(s, "%Y-%m-%d").date()
         if end_date >= datetime.now().date():
