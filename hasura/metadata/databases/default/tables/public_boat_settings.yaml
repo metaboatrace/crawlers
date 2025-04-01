@@ -1,0 +1,3 @@
+table:
+  name: boat_settings
+  schema: public

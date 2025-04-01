@@ -1,0 +1,3 @@
+table:
+  name: circumference_exhibition_records
+  schema: public

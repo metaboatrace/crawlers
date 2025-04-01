@@ -1,0 +1,3 @@
+table:
+  name: racer_winning_rate_aggregations
+  schema: public

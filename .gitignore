@@ -91,3 +91,6 @@ override.tf.json
 celerybeat-schedule.db
 
 .env
+
+hasura/config.yaml
+hasura-cli.log
