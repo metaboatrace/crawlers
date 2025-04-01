@@ -2,6 +2,7 @@ import io
 import os
 
 import requests
+from cachetools import TTLCache, cached
 
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
@@ -10,10 +11,18 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-def fetch_html_as_io(url: str) -> io.StringIO:
+cache: TTLCache[str, str] = TTLCache(maxsize=10, ttl=60)
+
+
+@cached(cache)
+def _fetch_html_text(url: str) -> str:
     response = requests.get(url)
     response.raise_for_status()
-    return io.StringIO(response.text)
+    return response.text
+
+
+def fetch_html_as_io(url: str) -> io.StringIO:
+    return io.StringIO(_fetch_html_text(url))
 
 
 def send_slack_notification(message: str) -> None:

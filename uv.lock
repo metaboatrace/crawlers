@@ -83,6 +83,15 @@ wheels = [
 ]
 
 [[package]]
+name = "cachetools"
+version = "5.5.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/6c/81/3747dad6b14fa2cf53fcf10548cf5aea6913e96fab41a3c198676f8948a5/cachetools-5.5.2.tar.gz", hash = "sha256:1a661caa9175d26759571b2e19580f9d6393969e5dfca11fdb1f947a23e640d4", size = 28380 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/72/76/20fa66124dbe6be5cafeb312ece67de6b61dd91a0247d1ea13db4ebb33c2/cachetools-5.5.2-py3-none-any.whl", hash = "sha256:d26a22bcc62eb95c3beabd9f1ee5e820d3d2704fe2967cbe350e20c8ffcd3f0a", size = 10080 },
+]
+
+[[package]]
 name = "celery"
 version = "5.4.0"
 source = { registry = "https://pypi.org/simple" }
@@ -267,6 +276,7 @@ name = "crawlers"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "cachetools" },
     { name = "celery" },
     { name = "cryptography" },
     { name = "flower" },
@@ -281,6 +291,7 @@ dependencies = [
     { name = "slack-sdk" },
     { name = "sqlalchemy" },
     { name = "tqdm" },
+    { name = "types-cachetools" },
     { name = "types-pytz" },
     { name = "types-requests" },
 ]
@@ -290,10 +301,12 @@ dev = [
     { name = "black" },
     { name = "mypy" },
     { name = "pytest" },
+    { name = "types-cachetools" },
 ]
 
 [package.metadata]
 requires-dist = [
+    { name = "cachetools", specifier = ">=5.3.2" },
     { name = "celery", specifier = ">=5.3.6" },
     { name = "cryptography", specifier = ">=41.0.5" },
     { name = "flower", specifier = ">=2.0.1" },
@@ -308,6 +321,7 @@ requires-dist = [
     { name = "slack-sdk", specifier = ">=3.27.1" },
     { name = "sqlalchemy", specifier = ">=2.0.23" },
     { name = "tqdm", specifier = ">=4.66.1" },
+    { name = "types-cachetools", specifier = ">=5.5.0.20240820" },
     { name = "types-pytz", specifier = ">=2023.3.1.1" },
     { name = "types-requests", specifier = ">=2.31.0.2" },
 ]
@@ -317,6 +331,7 @@ dev = [
     { name = "black", specifier = ">=25.1.0" },
     { name = "mypy", specifier = ">=1.15.0" },
     { name = "pytest", specifier = ">=8.3.5" },
+    { name = "types-cachetools", specifier = ">=5.3.0.20240311" },
 ]
 
 [[package]]
@@ -936,6 +951,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/a8/4b/29b4ef32e036bb34e4ab51796dd745cdba7ed47ad142a9f4a1eb8e0c744d/tqdm-4.67.1.tar.gz", hash = "sha256:f8aef9c52c08c13a65f30ea34f4e5aac3fd1a34959879d7e59e63027286627f2", size = 169737 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/d0/30/dc54f88dd4a2b5dc8a0279bdd7270e735851848b762aeb1c1184ed1f6b14/tqdm-4.67.1-py3-none-any.whl", hash = "sha256:26445eca388f82e72884e0d580d5464cd801a3ea01e63e5601bdff9ba6a48de2", size = 78540 },
+]
+
+[[package]]
+name = "types-cachetools"
+version = "5.5.0.20240820"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/c2/7e/ad6ba4a56b2a994e0f0a04a61a50466b60ee88a13d10a18c83ac14a66c61/types-cachetools-5.5.0.20240820.tar.gz", hash = "sha256:b888ab5c1a48116f7799cd5004b18474cd82b5463acb5ffb2db2fc9c7b053bc0", size = 4198 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/27/4d/fd7cc050e2d236d5570c4d92531c0396573a1e14b31735870e849351c717/types_cachetools-5.5.0.20240820-py3-none-any.whl", hash = "sha256:efb2ed8bf27a4b9d3ed70d33849f536362603a90b8090a328acf0cd42fda82e2", size = 4149 },
 ]
 
 [[package]]
