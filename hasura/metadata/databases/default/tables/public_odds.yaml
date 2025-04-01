@@ -1,0 +1,3 @@
+table:
+  name: odds
+  schema: public

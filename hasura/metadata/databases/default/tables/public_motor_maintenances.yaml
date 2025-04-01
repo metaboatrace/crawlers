@@ -1,0 +1,3 @@
+table:
+  name: motor_maintenances
+  schema: public

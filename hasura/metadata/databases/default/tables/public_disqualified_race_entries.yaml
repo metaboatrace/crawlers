@@ -1,0 +1,3 @@
+table:
+  name: disqualified_race_entries
+  schema: public

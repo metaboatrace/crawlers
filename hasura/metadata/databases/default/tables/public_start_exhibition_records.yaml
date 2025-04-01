@@ -1,0 +1,3 @@
+table:
+  name: start_exhibition_records
+  schema: public

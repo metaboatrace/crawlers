@@ -3,6 +3,8 @@
 - Python 3.13+
 - Node.js 18.17+
 - PostgreSQL 16.1+
+- Docker
+- hasura-cli
 
 ## ローカル開発環境構築
 
@@ -38,6 +40,37 @@ $ psql -h 127.0.0.1 -p 55432 -U postgres -d metaboatrace_development -f 20200501
 
 ```bash
 $ pg_dump -h 127.0.0.1 -p 55432 -U postgres -d metaboatrace_development -n public --data-only --exclude-table='stadiums' --exclude-table='racers' -f 20200501.dump
+```
+
+## Hasura Metadata の管理手順
+
+### エクスポート
+
+Hasura コンソールで設定変更（テーブルのトラック、リレーション追加、権限設定など）を行った後は、以下を実行
+
+```bash
+$ make hasura_export_metadata
+```
+
+その後、変更内容を Git にコミット
+
+### インポート
+
+別の開発環境や本番環境で最新のメタデータを適用する場合は、以下を実行
+
+```bash
+$ make hasura_apply_metadata
+```
+
+適当にリクエストしてレスポンスを得られたらOK
+
+```bash
+$ curl -X POST \
+  http://localhost:8080/v1/graphql \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "query": "query { events { stadium_tel_code title starts_on } }"
+  }' | jq
 ```
 
 ## トラブルシューティング

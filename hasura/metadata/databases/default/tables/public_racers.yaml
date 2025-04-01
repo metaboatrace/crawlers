@@ -1,0 +1,3 @@
+table:
+  name: racers
+  schema: public

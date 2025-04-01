@@ -1,0 +1,3 @@
+table:
+  name: racer_conditions
+  schema: public
