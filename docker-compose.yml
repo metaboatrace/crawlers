@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:16.1
+    image: postgres:17.4
     platform: linux/x86_64
     environment:
       POSTGRES_PASSWORD: 'password'
@@ -16,7 +16,7 @@ services:
       - '55432:5432'
 
   redis:
-    image: redis:latest
+    image: redis:7.4.2
     ports:
       - '6379:6379'
     networks:
