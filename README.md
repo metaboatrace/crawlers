@@ -14,7 +14,7 @@
 
 1. `source .venv/bin/activate`
 
-1. `docker-compose up`
+1. `docker compose up`
 
 1. 環境変数 `DATABASE_URL` を設定
 
@@ -43,6 +43,13 @@ $ pg_dump -h 127.0.0.1 -p 55432 -U postgres -d metaboatrace_development -n publi
 ```
 
 ## Hasura Metadata の管理手順
+
+`hasura/config.yaml` を以下のように適当に作成する
+
+```yaml
+version: 3
+endpoint: http://localhost:8080
+```
 
 ### エクスポート
 
