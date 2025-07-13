@@ -94,3 +94,5 @@ celerybeat-schedule.db
 
 hasura/config.yaml
 hasura-cli.log
+
+.claude
