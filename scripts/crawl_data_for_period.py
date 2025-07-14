@@ -1,6 +1,8 @@
 import argparse
 from datetime import datetime, timedelta, date
 from time import sleep
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from threading import Lock
 
 from metaboatrace.models.stadium import EventHoldingStatus
 from metaboatrace.scrapers.official.website.exceptions import DataNotFound, RaceCanceled
@@ -41,7 +43,45 @@ def _parse_args() -> argparse.Namespace:
     )
     parser.add_argument("end_date", type=_valid_end_date, help="終了日 (YYYY-MM-DD 形式)")
     parser.add_argument("--sleep", type=int, default=1, help="クロール間のスリープ時間 (秒)")
+    parser.add_argument("--parallel", type=int, default=1, help="並列実行数 (デフォルト: 1)")
     return parser.parse_args()
+
+
+# 進捗表示用のロック
+print_lock = Lock()
+
+
+def _crawl_single_race(
+    stadium_tel_code_value: int, current_date: date, race_number: int, sleep_second: int
+) -> None:
+    """単一レースのクロール処理"""
+    try:
+        crawl_functions = [
+            crawl_race_information_page,
+            crawl_race_before_information_page,
+            crawl_race_result_page,
+            crawl_trifecta_odds_page,
+        ]
+
+        for crawl_function in crawl_functions:
+            try:
+                crawl_function(stadium_tel_code_value, current_date, race_number)
+            except IncompleteDataError:
+                with print_lock:
+                    print(
+                        f"\t\t\t\033[94m[notice] Partial data missing in {crawl_function.__name__}. Continuing with next task.\033[0m"
+                    )
+            except RaceDeadlineChanged:
+                pass
+
+            sleep(sleep_second)
+
+    except RaceCanceled:
+        repository = RaceRepository()
+        repository.cancel(stadium_tel_code_value, current_date, race_number)
+        with print_lock:
+            print("\t\t\t\033[90m[info] The race was canceled. Moving to the next event.\033[0m")
+        raise  # 上位で処理するために再発生
 
 
 def _main() -> None:
@@ -49,6 +89,7 @@ def _main() -> None:
     start_date = args.start_date
     end_date = args.end_date
     sleep_second = args.sleep
+    max_workers = args.parallel
 
     start_message = f"🚀 Starting data crawl from {start_date} to {end_date}"
     send_slack_notification(start_message)
@@ -83,38 +124,50 @@ def _main() -> None:
                             "\t\t\t\033[93m[warn] The pre inspection information page had not found.\033[0m"
                         )
 
-                for race_number in range(1, 13):
-                    print(f"\t\tProcessing {race_number}R pages.")
-                    try:
-                        crawl_functions = [
-                            crawl_race_information_page,
-                            crawl_race_before_information_page,
-                            crawl_race_result_page,
-                            crawl_trifecta_odds_page,
-                        ]
+                race_numbers = list(range(1, 13))
 
-                        for crawl_function in crawl_functions:
+                if max_workers == 1:
+                    # シリアル処理（従来通り）
+                    for race_number in race_numbers:
+                        print(f"\t\tProcessing {race_number}R pages.")
+                        try:
+                            _crawl_single_race(
+                                e.stadium_tel_code.value, current_date, race_number, sleep_second
+                            )
+                        except RaceCanceled:
+                            break
+                else:
+                    # 並列処理
+                    print(f"\t\tProcessing races 1-12 with {max_workers} workers...")
+                    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+                        # レース毎のタスクを投入
+                        future_to_race = {
+                            executor.submit(
+                                _crawl_single_race,
+                                e.stadium_tel_code.value,
+                                current_date,
+                                race_number,
+                                sleep_second,
+                            ): race_number
+                            for race_number in race_numbers
+                        }
+
+                        # 結果を処理
+                        for future in as_completed(future_to_race):
+                            race_number = future_to_race[future]
                             try:
-                                crawl_function(e.stadium_tel_code.value, current_date, race_number)
-                            except IncompleteDataError:
-                                print(
-                                    "\t\t\t\033[94m[notice] Partial data missing in {function}. Continuing with next task.\033[0m".format(
-                                        function=crawl_function.__name__
+                                future.result()
+                                with print_lock:
+                                    print(f"\t\t\t✓ Completed {race_number}R")
+                            except RaceCanceled:
+                                with print_lock:
+                                    print(f"\t\t\t✗ Race {race_number}R was canceled")
+                                # 並列処理では個別のキャンセルは継続
+                            except Exception as exc:
+                                with print_lock:
+                                    print(
+                                        f"\t\t\t✗ Race {race_number}R generated an exception: {exc}"
                                     )
-                                )
-                            except RaceDeadlineChanged:
-                                pass
-
-                            sleep(sleep_second)
-                    except RaceCanceled:
-                        # HACK: 展示航走までは実施されてるならレース結果をスクレピングしたらこの例外出るけど
-                        # 展示も実施されてないなら ValueError とかが出てここに到達しないのでは？
-                        repository = RaceRepository()
-                        repository.cancel(e.stadium_tel_code.value, current_date, race_number)
-                        print(
-                            "\t\t\t\033[90m[info] The race was canceled. Moving to the next event.\033[0m"
-                        )
-                        break
 
         success_message = f"✅ Successfully completed data crawl from {start_date} to {end_date}"
         send_slack_notification(success_message)

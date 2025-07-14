@@ -8,17 +8,15 @@ from sqlalchemy.ext.declarative import DeclarativeMeta
 from sqlalchemy.orm import Session as SQLAlchemySession
 
 
-def create_upsert_strategy() -> (
-    Callable[
-        [
-            SQLAlchemySession,
-            Type[DeclarativeMeta],
-            list[dict[str, Any]],
-            list[str],
-        ],
-        bool,
-    ]
-):
+def create_upsert_strategy() -> Callable[
+    [
+        SQLAlchemySession,
+        Type[DeclarativeMeta],
+        list[dict[str, Any]],
+        list[str],
+    ],
+    bool,
+]:
     if os.environ.get("DB", "postgresql") == "mysql":
         return _mysql_upsert_strategy
     else:
