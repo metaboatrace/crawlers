@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-cache: TTLCache[str, str] = TTLCache(maxsize=10, ttl=60)
+cache: TTLCache[str, str] = TTLCache(maxsize=1000, ttl=3600)
 
 
 @cached(cache)
