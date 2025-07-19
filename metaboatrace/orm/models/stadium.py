@@ -1,7 +1,7 @@
 from datetime import datetime
 from enum import Enum
 
-from sqlalchemy import Boolean, Column, Date, DateTime, Float, Integer, String, text
+from sqlalchemy import Boolean, Column, Date, DateTime, Float, Index, Integer, String, text
 from sqlalchemy.sql.schema import ForeignKey
 
 from ..database import Base
@@ -50,9 +50,9 @@ class WeatherCondition(Base):
     __tablename__ = "weather_conditions"
 
     stadium_tel_code = Column(Integer, ForeignKey("stadiums.tel_code"), primary_key=True)
-    date = Column(Date, primary_key=True)
+    date = Column(Date, primary_key=True, index=True)
     race_number = Column(Integer, primary_key=True)
-    is_in_performance = Column(Boolean, primary_key=True)
+    is_in_performance = Column(Boolean, primary_key=True, index=True)
     weather = Column(Integer, nullable=False)
     wind_velocity = Column(Float, nullable=False)
     wind_angle = Column(Float)

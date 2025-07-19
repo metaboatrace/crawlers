@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Boolean, Column, Date, DateTime, Float, ForeignKey, Integer, UniqueConstraint
+from sqlalchemy import Boolean, Column, Date, DateTime, Float, ForeignKey, Index, Integer, UniqueConstraint
 
 from ..database import Base
 
@@ -30,6 +30,10 @@ class BoatSetting(Base):
     is_propeller_renewed = Column(Boolean, nullable=True)
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
     updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    __table_args__ = (
+        Index("idx_boat_settings_date_motor", "date", "motor_number", "stadium_tel_code"),
+    )
 
 
 class BoatBettingContributeRateAggregation(Base):

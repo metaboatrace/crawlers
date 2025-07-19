@@ -6,6 +6,7 @@ from sqlalchemy import (
     Date,
     DateTime,
     Float,
+    Index,
     Integer,
     String,
     UniqueConstraint,
@@ -51,6 +52,8 @@ class RaceEntry(Base):
             "racer_registration_number",
             name="uniq_index_1",
         ),
+        Index("idx_race_entries_date_racer", "date", "racer_registration_number"),
+        Index("idx_race_entries_racer_date", "racer_registration_number", "date"),
     )
 
 
@@ -83,10 +86,10 @@ class RaceRecord(Base):
     __tablename__ = "race_records"
 
     stadium_tel_code = Column(Integer, ForeignKey("stadiums.tel_code"), primary_key=True)
-    date = Column(Date, primary_key=True)
+    date = Column(Date, primary_key=True, index=True)
     race_number = Column(Integer, primary_key=True)
     pit_number = Column(Integer, primary_key=True)
-    course_number = Column(Integer, nullable=False)
+    course_number = Column(Integer, nullable=False, index=True)
     start_time = Column(Float)
     race_time = Column(Float)
     arrival = Column(Integer)
@@ -101,7 +104,7 @@ class WinningRaceEntry(Base):
     date = Column(Date, primary_key=True)
     race_number = Column(Integer, primary_key=True)
     pit_number = Column(Integer, primary_key=True)
-    winning_trick = Column(Integer, nullable=False)
+    winning_trick = Column(Integer, nullable=False, index=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, nullable=False, onupdate=datetime.utcnow)
 
