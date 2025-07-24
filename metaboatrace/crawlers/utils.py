@@ -11,14 +11,28 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-cache: TTLCache[str, str] = TTLCache(maxsize=1000, ttl=3600)
+cache: TTLCache[str, str] = TTLCache(maxsize=10000, ttl=3600)  # サイズを増やして並列処理に対応
 
 
 @cached(cache)
 def _fetch_html_text(url: str) -> str:
-    response = requests.get(url)
-    response.raise_for_status()
-    return response.text
+    try:
+        # タイムアウトを設定し、リトライを実装
+        response = requests.get(
+            url,
+            timeout=30,  # 30秒のタイムアウト
+            headers={
+                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
+            }
+        )
+        response.raise_for_status()
+        return response.text
+    except requests.exceptions.Timeout:
+        # タイムアウト時はキャッシュしない
+        raise
+    except requests.exceptions.RequestException:
+        # その他のリクエストエラーもキャッシュしない
+        raise
 
 
 def fetch_html_as_io(url: str) -> io.StringIO:
