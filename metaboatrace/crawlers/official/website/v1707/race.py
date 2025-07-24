@@ -1,8 +1,29 @@
 import time
 from datetime import date
 
+from metaboatrace.crawlers.celery import app
+from metaboatrace.crawlers.exceptions import IncompleteDataError, RaceDeadlineChanged
+from metaboatrace.crawlers.utils import fetch_html_as_io
 from metaboatrace.models.race import BoatSetting, RaceEntry
 from metaboatrace.models.stadium import StadiumTelCode
+from metaboatrace.repositories import (
+    BoatBettingContributeRateAggregationRepository,
+    BoatSettingRepository,
+    CircumferenceExhibitionRecordRepository,
+    DisqualifiedRaceEntryRepository,
+    MotorBettingContributeRateAggregationRepository,
+    MotorMaintenanceRepository,
+    OddsRepository,
+    PayoffRepository,
+    RaceEntryRepository,
+    RacerConditionRepository,
+    RaceRecordRepository,
+    RaceRepository,
+    RacerWinningRateAggregationRepository,
+    StartExhibitionRecordRepository,
+    WeatherConditionRepository,
+    WinningRaceEntryRepository,
+)
 from metaboatrace.scrapers.official.website.exceptions import DataNotFound, RaceCanceled
 from metaboatrace.scrapers.official.website.v1707.pages.race.before_information_page.location import (
     create_race_before_information_page_url,
@@ -40,28 +61,6 @@ from metaboatrace.scrapers.official.website.v1707.pages.race.result_page.scrapin
 )
 from metaboatrace.scrapers.official.website.v1707.pages.race.result_page.scraping import (
     extract_weather_condition as extract_weather_condition_in_performance,
-)
-
-from metaboatrace.crawlers.celery import app
-from metaboatrace.crawlers.exceptions import IncompleteDataError, RaceDeadlineChanged
-from metaboatrace.crawlers.utils import fetch_html_as_io
-from metaboatrace.repositories import (
-    BoatBettingContributeRateAggregationRepository,
-    BoatSettingRepository,
-    CircumferenceExhibitionRecordRepository,
-    DisqualifiedRaceEntryRepository,
-    MotorBettingContributeRateAggregationRepository,
-    MotorMaintenanceRepository,
-    OddsRepository,
-    PayoffRepository,
-    RaceEntryRepository,
-    RacerConditionRepository,
-    RaceRecordRepository,
-    RaceRepository,
-    RacerWinningRateAggregationRepository,
-    StartExhibitionRecordRepository,
-    WeatherConditionRepository,
-    WinningRaceEntryRepository,
 )
 
 
@@ -119,8 +118,6 @@ def crawl_race_information_page(stadium_tel_code: int, date: date, race_number: 
         raise RaceDeadlineChanged
 
 
-# HACK: 型に統一性がない
-# stadium_tel_code 系の引数の型が int だったり StadiumTelCode だったりするのはサーバーレスアーキテクチャ採用時の名残
 @app.task
 def crawl_all_race_information_for_date_and_stadiums(
     date: date, stadium_tel_codes: list[StadiumTelCode]
@@ -132,7 +129,10 @@ def crawl_all_race_information_for_date_and_stadiums(
                 time.sleep(3)
             except Exception as e:
                 # TODO: バグトラッキングシステムに通知
-                print(
+                import logging
+
+                logger = logging.getLogger(__name__)
+                logger.error(
                     f"Error crawling race {race_number} at {stadium_tel_code.name} on {date}: {e}"
                 )
 
@@ -142,21 +142,15 @@ def crawl_race_before_information_page(stadium_tel_code: int, date: date, race_n
     url = create_race_before_information_page_url(
         date, StadiumTelCode(stadium_tel_code), race_number
     )
-    # note: データが壊れてしまってるページがあったがこれはどうしようもない
-    # https://boatrace.jp/owpc/pc/race/beforeinfo?rno=3&jcd=01&hd=20200615
     html_io = fetch_html_as_io(url)
     start_exhibition_records = extract_start_exhibition_records(html_io)
     if not start_exhibition_records:
-        # note: レース中止で展示も実施されなかったらここが空になる
-        # https://boatrace.jp/owpc/pc/race/beforeinfo?rno=9&jcd=03&hd=20200503
-        # hack: レース中止かどうかは結果ページを見ないとわからない
-        # リアルタイムでクロールしているときは時系列的にレース中止の記載があるかは不明だが取れたら取る
         try:
             crawl_race_result_page(StadiumTelCode(stadium_tel_code), date, race_number)
         except RaceCanceled:
             raise
-        except Exception:
-            raise DataNotFound
+        except Exception as e:
+            raise DataNotFound from e
 
     start_exhibition_record_repository = StartExhibitionRecordRepository()
     start_exhibition_record_repository.create_or_update_many(start_exhibition_records)
@@ -164,8 +158,6 @@ def crawl_race_before_information_page(stadium_tel_code: int, date: date, race_n
     html_io.seek(0)
     circumference_exhibition_records = extract_circumference_exhibition_records(html_io)
     if not circumference_exhibition_records:
-        # note: スタート展示は実施されたけど周回展示の時点で中止になることが稀にある
-        # https://boatrace.jp/owpc/pc/race/beforeinfo?rno=8&jcd=03&hd=20240322
         raise RaceCanceled
 
     circumference_exhibition_record_repository = CircumferenceExhibitionRecordRepository()
@@ -185,16 +177,14 @@ def crawl_race_before_information_page(stadium_tel_code: int, date: date, race_n
 
     motor_maintenance_repsitory = MotorMaintenanceRepository()
     motor_maintenance_repsitory.create_or_update_many(
-        [b for b in boat_settings if 0 < len(b.motor_parts_exchanges)]
+        [b for b in boat_settings if len(b.motor_parts_exchanges) > 0]
     )
 
     html_io.seek(0)
     try:
         weather_condition = extract_weather_condition(html_io)
-    except ValueError:
-        # note: 他のデータは正常に取れるのに気象情報だけ取れないケースがごく稀にある
-        # https://boatrace.jp/owpc/pc/race/beforeinfo?rno=1&jcd=15&hd=20231124
-        raise IncompleteDataError
+    except ValueError as e:
+        raise IncompleteDataError from e
     weather_condition_repository = WeatherConditionRepository()
     weather_condition_repository.create_or_update(weather_condition)
 

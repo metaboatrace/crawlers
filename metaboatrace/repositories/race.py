@@ -1,5 +1,5 @@
 from datetime import date
-from typing import Any, Optional
+from typing import Any
 
 from metaboatrace.models.race import (
     CircumferenceExhibitionRecord as CircumferenceExhibitionRecordEntity,
@@ -12,7 +12,6 @@ from metaboatrace.models.race import RaceInformation as RaceEntity
 from metaboatrace.models.race import RaceRecord as RaceRecordEntity
 from metaboatrace.models.race import StartExhibitionRecord as StartExhibitionRecordEntity
 from metaboatrace.models.stadium import StadiumTelCode
-
 from metaboatrace.orm.database import Session
 from metaboatrace.orm.models.race import (
     CircumferenceExhibitionRecord as CircumferenceExhibitionRecordOrm,
@@ -57,9 +56,7 @@ def _race_orm_to_entity(race_orm: RaceOrm) -> RaceEntity:
 
 
 class RaceRepository(Repository[RaceEntity]):
-    def find_by_key(
-        self, stadium_tel_code: int, date: date, race_number: int
-    ) -> Optional[RaceEntity]:
+    def find_by_key(self, stadium_tel_code: int, date: date, race_number: int) -> RaceEntity | None:
         session = Session()
         try:
             race_orm = (
@@ -96,14 +93,16 @@ class RaceRepository(Repository[RaceEntity]):
     def create_or_update_many(
         self,
         data: list[RaceEntity],
-        on_duplicate_key_update: list[str] = [
-            "title",
-            "is_course_fixed",
-            "number_of_laps",
-            "is_stabilizer_used",
-            "betting_deadline_at",
-        ],
+        on_duplicate_key_update: list[str] | None = None,
     ) -> bool:
+        if on_duplicate_key_update is None:
+            on_duplicate_key_update = [
+                "title",
+                "is_course_fixed",
+                "number_of_laps",
+                "is_stabilizer_used",
+                "betting_deadline_at",
+            ]
         values = [_transform_race_entity(entity) for entity in data]
 
         upsert_strategy = create_upsert_strategy()
@@ -165,8 +164,10 @@ class RaceEntryRepository(Repository[RaceEntryEntity]):
     def create_or_update_many(
         self,
         data: list[RaceEntryEntity],
-        on_duplicate_key_update: list[str] = ["racer_registration_number"],
+        on_duplicate_key_update: list[str] | None = None,
     ) -> bool:
+        if on_duplicate_key_update is None:
+            on_duplicate_key_update = ["racer_registration_number"]
         values = [_transform_race_entry_entity(entity) for entity in data]
 
         upsert_strategy = create_upsert_strategy()
@@ -200,8 +201,10 @@ class StartExhibitionRecordRepository(Repository[StartExhibitionRecordEntity]):
     def create_or_update_many(
         self,
         data: list[StartExhibitionRecordEntity],
-        on_duplicate_key_update: list[str] = ["course_number", "start_time"],
+        on_duplicate_key_update: list[str] | None = None,
     ) -> bool:
+        if on_duplicate_key_update is None:
+            on_duplicate_key_update = ["course_number", "start_time"]
         values = [_transform_start_exhibition_record_entity(entity) for entity in data]
 
         upsert_strategy = create_upsert_strategy()
@@ -234,8 +237,10 @@ class CircumferenceExhibitionRecordRepository(Repository[CircumferenceExhibition
     def create_or_update_many(
         self,
         data: list[CircumferenceExhibitionRecordEntity],
-        on_duplicate_key_update: list[str] = ["exhibition_time"],
+        on_duplicate_key_update: list[str] | None = None,
     ) -> bool:
+        if on_duplicate_key_update is None:
+            on_duplicate_key_update = ["exhibition_time"]
         values = [_transform_circumference_exhibition_record_entity(entity) for entity in data]
 
         upsert_strategy = create_upsert_strategy()
@@ -271,8 +276,10 @@ class OddsRepository(Repository[OddsEntity]):
     def create_or_update_many(
         self,
         data: list[OddsEntity],
-        on_duplicate_key_update: list[str] = ["ratio"],
+        on_duplicate_key_update: list[str] | None = None,
     ) -> bool:
+        if on_duplicate_key_update is None:
+            on_duplicate_key_update = ["ratio"]
         values = [_transform_odds_entity(entity) for entity in data]
 
         upsert_strategy = create_upsert_strategy()
@@ -308,8 +315,10 @@ class PayoffRepository(Repository[PayoffEntity]):
     def create_or_update_many(
         self,
         data: list[PayoffEntity],
-        on_duplicate_key_update: list[str] = ["amount"],
+        on_duplicate_key_update: list[str] | None = None,
     ) -> bool:
+        if on_duplicate_key_update is None:
+            on_duplicate_key_update = ["amount"]
         values = [_transform_payoff_entity(entity) for entity in data]
 
         upsert_strategy = create_upsert_strategy()
@@ -347,13 +356,15 @@ class RaceRecordRepository(Repository[RaceRecordEntity]):
     def create_or_update_many(
         self,
         data: list[RaceRecordEntity],
-        on_duplicate_key_update: list[str] = [
-            "course_number",
-            "start_time",
-            "race_time",
-            "arrival",
-        ],
+        on_duplicate_key_update: list[str] | None = None,
     ) -> bool:
+        if on_duplicate_key_update is None:
+            on_duplicate_key_update = [
+                "course_number",
+                "start_time",
+                "race_time",
+                "arrival",
+            ]
         values = [
             _transform_race_record_entity(entity)
             for entity in data
@@ -393,10 +404,12 @@ class WinningRaceEntryRepository(Repository[RaceRecordEntity]):
     def create_or_update_many(
         self,
         data: list[RaceRecordEntity],
-        on_duplicate_key_update: list[str] = [
-            "winning_trick",
-        ],
+        on_duplicate_key_update: list[str] | None = None,
     ) -> bool:
+        if on_duplicate_key_update is None:
+            on_duplicate_key_update = [
+                "winning_trick",
+            ]
         values = [_transform_race_record_entity_to_winning_race_entry(entity) for entity in data]
 
         upsert_strategy = create_upsert_strategy()
@@ -429,10 +442,12 @@ class DisqualifiedRaceEntryRepository(Repository[RaceRecordEntity]):
     def create_or_update_many(
         self,
         data: list[RaceRecordEntity],
-        on_duplicate_key_update: list[str] = [
-            "disqualification",
-        ],
+        on_duplicate_key_update: list[str] | None = None,
     ) -> bool:
+        if on_duplicate_key_update is None:
+            on_duplicate_key_update = [
+                "disqualification",
+            ]
         values = [
             _transform_race_record_entity_to_disqualified_race_entry(entity) for entity in data
         ]

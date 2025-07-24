@@ -2,9 +2,6 @@ import time
 from datetime import date, datetime, timedelta
 
 import pytz
-from metaboatrace.models.race import RaceInformation as RaceEntity
-from metaboatrace.models.stadium import EventHoldingStatus
-from metaboatrace.scrapers.official.website.exceptions import DataNotFound, RaceCanceled
 
 from metaboatrace.crawlers.celery import app
 from metaboatrace.crawlers.exceptions import RaceDeadlineChanged
@@ -21,9 +18,12 @@ from metaboatrace.crawlers.official.website.v1707.stadium import (
     crawl_events_from_monthly_schedule_page,
     crawl_pre_inspection_information_page,
 )
+from metaboatrace.models.race import RaceInformation as RaceEntity
+from metaboatrace.models.stadium import EventHoldingStatus
 from metaboatrace.orm.database import Session
 from metaboatrace.orm.models import Racer
 from metaboatrace.repositories import RaceRepository, RacerRepository
+from metaboatrace.scrapers.official.website.exceptions import DataNotFound, RaceCanceled
 
 jst = pytz.timezone("Asia/Tokyo")
 
@@ -113,7 +113,7 @@ def _schedule_race_tasks(race: RaceEntity, tasks_with_timedelta, prefix: str = "
 
 @app.task
 def schedule_crawl_events_from_monthly_schedule_page() -> None:
-    now = datetime.now()
+    now = datetime.now(jst)
     year = now.year
     month = now.month
     crawl_events_from_monthly_schedule_page(year, month)
@@ -162,7 +162,6 @@ def reserve_crawl_task_for_races_today() -> None:
         for race_entity in races_today:
             _schedule_race_tasks(race_entity, tasks_with_timedelta)
     except Exception as e:
-        # todo: 必要あれば制御
         raise e
 
 
@@ -170,7 +169,7 @@ def reserve_crawl_task_for_races_today() -> None:
 def enqueue_incomplete_racer_crawling() -> None:
     session = Session()
     try:
-        incomplete_racers = session.query(Racer).filter(Racer.status == None).limit(3).all()
+        incomplete_racers = session.query(Racer).filter(Racer.status.is_(None)).limit(3).all()
 
         racer_registration_numbers = [racer.registration_number for racer in incomplete_racers]
 

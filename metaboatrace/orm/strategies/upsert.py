@@ -1,5 +1,6 @@
 import os
-from typing import Any, Callable, Type
+from collections.abc import Callable
+from typing import Any
 
 import sqlalchemy.dialects.mysql as mysql
 import sqlalchemy.dialects.postgresql as postgresql
@@ -11,7 +12,7 @@ from sqlalchemy.orm import Session as SQLAlchemySession
 def create_upsert_strategy() -> Callable[
     [
         SQLAlchemySession,
-        Type[DeclarativeMeta],
+        type[DeclarativeMeta],
         list[dict[str, Any]],
         list[str],
     ],
@@ -19,13 +20,12 @@ def create_upsert_strategy() -> Callable[
 ]:
     if os.environ.get("DB", "postgresql") == "mysql":
         return _mysql_upsert_strategy
-    else:
-        return _postgresql_upsert_strategy
+    return _postgresql_upsert_strategy
 
 
 def _mysql_upsert_strategy(
     session: SQLAlchemySession,
-    model: Type[DeclarativeMeta],
+    model: type[DeclarativeMeta],
     values: list[dict[str, Any]],
     on_duplicate_key_update: list[str],
 ) -> bool:
@@ -44,7 +44,7 @@ def _mysql_upsert_strategy(
 
 def _postgresql_upsert_strategy(
     session: SQLAlchemySession,
-    model: Type[DeclarativeMeta],
+    model: type[DeclarativeMeta],
     values: list[dict[str, Any]],
     on_duplicate_key_update: list[str],
 ) -> bool:
@@ -67,7 +67,7 @@ def _postgresql_upsert_strategy(
         raise e
 
 
-def _get_primary_keys(model: Type[DeclarativeMeta]) -> list[str]:
+def _get_primary_keys(model: type[DeclarativeMeta]) -> list[str]:
     """
     指定された SQLAlchemy モデルから主キーのカラム名のリストを返す。
     :param model: SQLAlchemy モデルクラス

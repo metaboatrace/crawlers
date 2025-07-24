@@ -8,10 +8,6 @@ app = Celery(
 )
 app.conf.timezone = "UTC"
 
-# note: 可読性からJSTで定義して、設定時はUTCに変更していたが、これだと毎回計算が実行されオーバヘッドになるので静的に定義
-# jst = pytz.timezone("Asia/Tokyo")
-# event_crawl_jst_time = datetime.now(jst).replace(hour=8, minute=0)
-# event_crawl_utc_time = event_crawl_jst_time.astimezone(pytz.utc)
 app.conf.beat_schedule = {
     "crawl-events-every-month": {
         "task": "metaboatrace.crawlers.scheduler.schedule_crawl_events_from_monthly_schedule_page",

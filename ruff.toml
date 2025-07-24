@@ -1,0 +1,51 @@
+# Ruff configuration
+line-length = 100
+target-version = "py311"
+
+[lint]
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # pyflakes
+    "I",      # isort
+    "N",      # pep8-naming
+    "UP",     # pyupgrade
+    "B",      # flake8-bugbear
+    "C4",     # flake8-comprehensions
+    "DTZ",    # flake8-datetimez
+    "T10",    # flake8-debugger
+    "ISC",    # flake8-implicit-str-concat
+    "PIE",    # flake8-pie
+    "T20",    # flake8-print
+    "Q",      # flake8-quotes
+    "RET",    # flake8-return
+    "SIM",    # flake8-simplify
+    "PTH",    # flake8-use-pathlib
+    "ERA",    # eradicate
+    "RUF",    # Ruff-specific rules
+]
+
+ignore = [
+    "E501",   # line too long (handled by formatter)
+    "B008",   # do not perform function calls in argument defaults
+    "RET504", # unnecessary variable assignment before return
+    "SIM108", # ternary operator
+    "F403",   # star imports
+    "N818",   # exception name should be Error suffix
+    "RUF003", # ambiguous unicode character (for Japanese comments)
+    "DTZ007", # naive datetime without timezone
+    "ISC001", # implicit string concatenation
+]
+
+[lint.per-file-ignores]
+"tests/**" = ["T20"]  # Allow print statements in tests
+"scripts/**" = ["T20"] # Allow print statements in scripts
+
+[lint.isort]
+known-first-party = ["metaboatrace"]
+
+[format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"

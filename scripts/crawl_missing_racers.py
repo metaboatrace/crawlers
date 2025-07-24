@@ -3,25 +3,24 @@ race_entriesテーブルに存在するがracersテーブルに存在しない�
 """
 
 import time
-from typing import List
 
-from metaboatrace.scrapers.official.website.exceptions import DataNotFound
 from sqlalchemy import text
 from tqdm import tqdm
 
 from metaboatrace.crawlers.official.website.v1707.racer import crawl_racer_from_racer_profile_page
 from metaboatrace.orm.database import Session
 from metaboatrace.repositories.racer import RacerRepository
+from metaboatrace.scrapers.official.website.exceptions import DataNotFound
 
 
-def find_missing_racers() -> List[int]:
+def find_missing_racers() -> list[int]:
     """race_entriesに存在するがracersテーブルに存在しないregistration_numberを取得"""
     session = Session()
     try:
         # race_entriesに存在するがracersに存在しないregistration_numberを取得
         query = text(
             """
-            SELECT DISTINCT re.racer_registration_number 
+            SELECT DISTINCT re.racer_registration_number
             FROM race_entries re
             LEFT JOIN racers r ON re.racer_registration_number = r.registration_number
             WHERE r.registration_number IS NULL

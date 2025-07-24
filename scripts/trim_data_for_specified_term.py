@@ -3,10 +3,12 @@ import logging
 import os
 import subprocess
 from datetime import datetime
+from pathlib import Path
+from zoneinfo import ZoneInfo
 
-from metaboatrace.models.racer import EvaluationPeriodType, RacerRatingEvaluationTerm
 from sqlalchemy import text
 
+from metaboatrace.models.racer import EvaluationPeriodType, RacerRatingEvaluationTerm
 from metaboatrace.orm.database import Session
 
 DATABASE_URL = os.environ.get(
@@ -54,9 +56,10 @@ def parse_args():  # type: ignore
     return parser.parse_args()
 
 
-def backup_database(backup_file: str, exclude_tables: bool = False) -> None:  # type: ignore
-    if not os.path.exists(BACKUP_DIR):
-        os.makedirs(BACKUP_DIR)
+def backup_database(backup_file: str, exclude_tables: bool = False) -> None:
+    backup_dir_path = Path(BACKUP_DIR)
+    if not backup_dir_path.exists():
+        backup_dir_path.mkdir(parents=True)
 
     pg_dump_command = [
         "pg_dump",
@@ -112,14 +115,15 @@ def main() -> None:
         logger.info("Aborted by user.")
         return
 
-    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-    pre_deletion_backup_file = os.path.join(BACKUP_DIR, f"backup_{timestamp}.dump")
+    jst = ZoneInfo("Asia/Tokyo")
+    timestamp = datetime.now(jst).strftime("%Y%m%d%H%M%S")
+    pre_deletion_backup_file = str(Path(BACKUP_DIR) / f"backup_{timestamp}.dump")
     backup_database(pre_deletion_backup_file)
 
     session = Session()
     try:
         delete_data_outside_term(session, term_start, term_end)
-        post_deletion_backup_file = os.path.join(BACKUP_DIR, f"{term_start}.dump")
+        post_deletion_backup_file = str(Path(BACKUP_DIR) / f"{term_start}.dump")
         backup_database(post_deletion_backup_file, exclude_tables=True)
     except Exception as e:
         logger.error(f"An error occurred: {e}")

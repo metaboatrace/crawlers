@@ -1,12 +1,12 @@
 import time
 
-from metaboatrace.scrapers.official.website.exceptions import DataNotFound
 from tqdm import tqdm
 
 from metaboatrace.crawlers.official.website.v1707.racer import crawl_racer_from_racer_profile_page
 from metaboatrace.orm.database import Session
 from metaboatrace.orm.models.racer import Racer
 from metaboatrace.repositories.racer import RacerRepository
+from metaboatrace.scrapers.official.website.exceptions import DataNotFound
 
 
 def update_racers() -> None:
@@ -26,7 +26,7 @@ def update_racers() -> None:
                 print(
                     f"\033[92m[success] Successfully processed racer {racer.registration_number}.\033[0m"
                 )
-            except DataNotFound as e:
+            except DataNotFound:
                 repository.make_retired(racer.registration_number)
                 print(
                     f"\033[90m[info] Racer {racer.registration_number} retired due to DataNotFound.\033[0m"

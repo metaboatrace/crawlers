@@ -4,7 +4,6 @@ from typing import Any
 from metaboatrace.models.race import WeatherCondition as WeatherConditionEntity
 from metaboatrace.models.stadium import Event as EventEntity
 from metaboatrace.models.stadium import MotorRenewal as MotorRenewalEntity
-
 from metaboatrace.orm.database import Session
 from metaboatrace.orm.models.stadium import Event as EventOrm
 from metaboatrace.orm.models.stadium import MotorRenewal as MotorRenewalOrm
@@ -19,8 +18,10 @@ class EventRepository(Repository[EventEntity]):
         raise NotImplementedError
 
     def create_or_update_many(
-        self, data: list[EventEntity], on_duplicate_key_update: list[str] = ["grade", "kind"]
+        self, data: list[EventEntity], on_duplicate_key_update: list[str] | None = None
     ) -> bool:
+        if on_duplicate_key_update is None:
+            on_duplicate_key_update = ["grade", "kind"]
         values = [
             {
                 "stadium_tel_code": e.stadium_tel_code.value,
@@ -63,7 +64,7 @@ class MotorRenewalRepository(Repository[MotorRenewalOrm]):
 
             session.commit()
             return True
-        except Exception as e:
+        except Exception:
             session.rollback()
             return False
         finally:
@@ -109,15 +110,17 @@ class WeatherConditionRepository(Repository[WeatherConditionEntity]):
     def create_or_update_many(
         self,
         data: list[WeatherConditionEntity],
-        on_duplicate_key_update: list[str] = [
-            "weather",
-            "wind_velocity",
-            "wind_angle",
-            "wavelength",
-            "air_temperature",
-            "water_temperature",
-        ],
+        on_duplicate_key_update: list[str] | None = None,
     ) -> bool:
+        if on_duplicate_key_update is None:
+            on_duplicate_key_update = [
+                "weather",
+                "wind_velocity",
+                "wind_angle",
+                "wavelength",
+                "air_temperature",
+                "water_temperature",
+            ]
         values = [_transform_weather_condition_entity(entity) for entity in data]
 
         upsert_strategy = create_upsert_strategy()

@@ -49,12 +49,14 @@ explicit_package_bases = true
 
 [tool.black]
 line-length = 100
-target-version = ['py310']
+target-version = ['py311']
 
 [dependency-groups]
 dev = [
     "black>=25.1.0",
     "mypy>=1.15.0",
+    "pre-commit>=4.2.0",
     "pytest>=8.3.5",
+    "ruff>=0.12.5",
     "types-cachetools>=5.3.0.20240311",
 ]

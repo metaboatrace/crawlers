@@ -1,9 +1,9 @@
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
-from metaboatrace.models.racer import Racer
 
 from metaboatrace.crawlers.official.website.v1707.racer import crawl_racer_from_racer_profile_page
+from metaboatrace.models.racer import Racer
 
 
 @pytest.fixture
@@ -26,7 +26,7 @@ def mock_extract_racer_profile():  # type: ignore
 def test_crawl_racer_from_racer_profile_page(
     mock_fetch_html_as_io: MagicMock, mock_extract_racer_profile: MagicMock
 ) -> None:
-    with patch("metaboatrace.repositories.RacerRepository") as MockRepository:
-        mock_repo = MockRepository.return_value
+    with patch("metaboatrace.repositories.RacerRepository") as mock_repository:
+        mock_repo = mock_repository.return_value
         crawl_racer_from_racer_profile_page(77777, mock_repo)
         mock_repo.create_or_update.assert_called_once_with(mock_extract_racer_profile.return_value)

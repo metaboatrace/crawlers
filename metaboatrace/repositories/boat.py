@@ -5,7 +5,6 @@ from metaboatrace.models.boat import BoatPerformance, MotorPerformance
 
 # hack: こっちのリポジトリでは boat モジュールに置いてるので統一したい
 from metaboatrace.models.race import BoatSetting as BoatSettingEntity
-
 from metaboatrace.orm.database import Session
 from metaboatrace.orm.models.boat import (
     BoatBettingContributeRateAggregation as BoatBettingContributeRateAggregationOrm,
@@ -76,7 +75,7 @@ class BoatSettingRepository(Repository[BoatSettingEntity]):
             if not boat_setting or boat_setting.motor_number is None:
                 raise MotorNumberNotFoundError()
 
-            return boat_setting.motor_number
+            return boat_setting.motor_number  # type: ignore[return-value]
 
 
 def _transform_boat_performance_entity(entity: BoatPerformance) -> dict[str, Any]:
@@ -96,8 +95,10 @@ class BoatBettingContributeRateAggregationRepository(Repository[BoatPerformance]
     def create_or_update_many(
         self,
         data: list[BoatPerformance],
-        on_duplicate_key_update: list[str] = ["quinella_rate", "trio_rate"],
+        on_duplicate_key_update: list[str] | None = None,
     ) -> bool:
+        if on_duplicate_key_update is None:
+            on_duplicate_key_update = ["quinella_rate", "trio_rate"]
         values = [_transform_boat_performance_entity(entity) for entity in data]
 
         upsert_strategy = create_upsert_strategy()
@@ -128,8 +129,10 @@ class MotorBettingContributeRateAggregationRepository(Repository[MotorPerformanc
     def create_or_update_many(
         self,
         data: list[MotorPerformance],
-        on_duplicate_key_update: list[str] = ["quinella_rate", "trio_rate"],
+        on_duplicate_key_update: list[str] | None = None,
     ) -> bool:
+        if on_duplicate_key_update is None:
+            on_duplicate_key_update = ["quinella_rate", "trio_rate"]
         values = [_transform_motor_performance_entity(entity) for entity in data]
 
         upsert_strategy = create_upsert_strategy()
@@ -150,8 +153,10 @@ class MotorMaintenanceRepository(Repository[BoatSettingEntity]):
     def create_or_update_many(
         self,
         data: list[BoatSettingEntity],
-        on_duplicate_key_update: list[str] = ["quantity"],
+        on_duplicate_key_update: list[str] | None = None,
     ) -> bool:
+        if on_duplicate_key_update is None:
+            on_duplicate_key_update = ["quantity"]
         boat_setting_repository = BoatSettingRepository()
         values = self._transform_entities_to_values(data, boat_setting_repository)
 

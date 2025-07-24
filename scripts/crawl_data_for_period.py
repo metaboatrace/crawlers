@@ -1,12 +1,12 @@
 import argparse
-from datetime import datetime, timedelta, date
-from time import sleep
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from threading import Lock, Event
 import sys
+from concurrent.futures import ThreadPoolExecutor
+from datetime import date, datetime, timedelta
+from threading import Event, Lock
+from time import sleep
+from typing import Any
+from zoneinfo import ZoneInfo
 
-from metaboatrace.models.stadium import EventHoldingStatus
-from metaboatrace.scrapers.official.website.exceptions import DataNotFound, RaceCanceled
 from tqdm import tqdm
 
 from metaboatrace.crawlers.exceptions import IncompleteDataError, RaceDeadlineChanged
@@ -21,18 +21,23 @@ from metaboatrace.crawlers.official.website.v1707.stadium import (
     crawl_events_from_monthly_schedule_page,
     crawl_pre_inspection_information_page,
 )
-from metaboatrace.repositories import RaceRepository
 from metaboatrace.crawlers.utils import send_slack_notification
+from metaboatrace.models.stadium import EventHoldingStatus
+from metaboatrace.repositories import RaceRepository
+from metaboatrace.scrapers.official.website.exceptions import DataNotFound, RaceCanceled
 
 
 def _valid_end_date(s: str) -> date:
     try:
         end_date = datetime.strptime(s, "%Y-%m-%d").date()
-        if end_date >= datetime.now().date():
+        jst = ZoneInfo("Asia/Tokyo")
+        if end_date >= datetime.now(jst).date():
             raise argparse.ArgumentTypeError("end_date は本日以前の日付である必要があります。")
         return end_date
-    except ValueError:
-        raise argparse.ArgumentTypeError("不正な日付形式です。YYYY-MM-DD 形式で入力してください。")
+    except ValueError as e:
+        raise argparse.ArgumentTypeError(
+            "不正な日付形式です。YYYY-MM-DD 形式で入力してください。"
+        ) from e
 
 
 def _parse_args() -> argparse.Namespace:
@@ -56,9 +61,9 @@ timeout_error_event = Event()
 
 def _crawl_single_race(
     stadium_tel_code_value: int, current_date: date, race_number: int, sleep_second: int
-) -> dict:
+) -> dict[str, Any]:
     """単一レースのクロール処理
-    
+
     Returns:
         dict: クロール結果 {"success": bool, "race_number": int, "error": str or None}
     """
@@ -97,7 +102,9 @@ def _crawl_single_race(
         # タイムアウトエラーの場合は特別扱い
         if "timeout" in error_msg.lower() or "timed out" in error_msg.lower():
             with print_lock:
-                print(f"\t\t\t\033[91m[CRITICAL] Timeout error detected for race {race_number}!\033[0m")
+                print(
+                    f"\t\t\t\033[91m[CRITICAL] Timeout error detected for race {race_number}!\033[0m"
+                )
             timeout_error_event.set()  # タイムアウトエラーを通知
         return {"success": False, "race_number": race_number, "error": error_msg}
 
@@ -156,12 +163,12 @@ def _main() -> None:
                 else:
                     # 並列処理（改良版）
                     print(f"\t\tProcessing races 1-12 with {max_workers} workers...")
-                    
+
                     # エラー統計を初期化
                     error_count = 0
                     canceled_count = 0
                     success_count = 0
-                    
+
                     with ThreadPoolExecutor(max_workers=max_workers) as executor:
                         # レース毎のタスクを投入（遅延実行で負荷分散）
                         futures = []
@@ -169,15 +176,17 @@ def _main() -> None:
                             # タイムアウトエラーが発生していたら即座に中止
                             if timeout_error_event.is_set():
                                 executor.shutdown(wait=False, cancel_futures=True)
-                                print(f"\n\033[91m[FATAL] Timeout error detected. Aborting all tasks...\033[0m")
+                                print(
+                                    "\n\033[91m[FATAL] Timeout error detected. Aborting all tasks...\033[0m"
+                                )
                                 error_message = f"💥 FATAL: Timeout error during crawl on {current_date}. Aborted immediately."
                                 send_slack_notification(error_message)
                                 sys.exit(1)
-                            
+
                             # 各タスクの開始を少しずつ遅延させる
                             if i > 0 and i % max_workers == 0:
                                 sleep(sleep_second)
-                            
+
                             future = executor.submit(
                                 _crawl_single_race,
                                 e.stadium_tel_code.value,
@@ -192,13 +201,17 @@ def _main() -> None:
                             # タイムアウトエラーが発生していたら即座に中止
                             if timeout_error_event.is_set():
                                 executor.shutdown(wait=False, cancel_futures=True)
-                                print(f"\n\033[91m[FATAL] Timeout error detected. Aborting all tasks...\033[0m")
+                                print(
+                                    "\n\033[91m[FATAL] Timeout error detected. Aborting all tasks...\033[0m"
+                                )
                                 error_message = f"💥 FATAL: Timeout error during crawl on {current_date}. Aborted immediately."
                                 send_slack_notification(error_message)
                                 sys.exit(1)
-                            
+
                             try:
-                                result = future.result(timeout=60)  # 各タスクに60秒のタイムアウトを設定
+                                result = future.result(
+                                    timeout=60
+                                )  # 各タスクに60秒のタイムアウトを設定
                                 if result["success"]:
                                     success_count += 1
                                     with print_lock:
@@ -223,25 +236,31 @@ def _main() -> None:
                                 # タイムアウトエラーの場合は即座に中止
                                 if "timeout" in error_msg.lower():
                                     executor.shutdown(wait=False, cancel_futures=True)
-                                    print(f"\n\033[91m[FATAL] Timeout error detected. Aborting all tasks...\033[0m")
+                                    print(
+                                        "\n\033[91m[FATAL] Timeout error detected. Aborting all tasks...\033[0m"
+                                    )
                                     error_message = f"💥 FATAL: Timeout error during crawl on {current_date}. Aborted immediately."
                                     send_slack_notification(error_message)
                                     sys.exit(1)
-                        
+
                         # 統計を表示
                         total = len(race_numbers)
                         with print_lock:
-                            print(f"\t\t📊 Results: Success={success_count}/{total}, Canceled={canceled_count}, Errors={error_count}")
-                        
+                            print(
+                                f"\t\t📊 Results: Success={success_count}/{total}, Canceled={canceled_count}, Errors={error_count}"
+                            )
+
                         # エラー率が高い場合は警告
                         if error_count > total * 0.3:  # 30%以上のエラー
-                            print(f"\t\t⚠️  High error rate detected! Consider reducing parallel workers or increasing sleep time.")
+                            print(
+                                "\t\t⚠️  High error rate detected! Consider reducing parallel workers or increasing sleep time."
+                            )
 
         success_message = f"✅ Successfully completed data crawl from {start_date} to {end_date}"
         send_slack_notification(success_message)
 
     except Exception as e:
-        error_message = f"❌ Error during data crawl from {start_date} to {end_date}: {str(e)}"
+        error_message = f"❌ Error during data crawl from {start_date} to {end_date}: {e!s}"
         send_slack_notification(error_message)
         raise
 

@@ -4,7 +4,6 @@ from typing import Any
 from metaboatrace.models.racer import Racer as RacerEntity
 from metaboatrace.models.racer import RacerCondition as RacerConditionEntity
 from metaboatrace.models.racer import RacerPerformance as RacerPerformanceEntity
-
 from metaboatrace.orm.database import Session
 from metaboatrace.orm.models.racer import Racer as RacerOrm
 from metaboatrace.orm.models.racer import RacerCondition as RacerConditionOrm
@@ -47,7 +46,7 @@ class RacerRepository(Repository[RacerEntity]):
                 entity.born_prefecture.value if entity.born_prefecture else None
             )
             racer_orm.height = entity.height
-            racer_orm.status = RacerStatus.active.value
+            racer_orm.status = RacerStatus.active.value  # type: ignore[assignment]
 
             session.commit()
         except Exception as e:
@@ -59,8 +58,10 @@ class RacerRepository(Repository[RacerEntity]):
         return True
 
     def create_or_update_many(
-        self, data: list[RacerEntity], on_duplicate_key_update: list[str] = ["gender"]
+        self, data: list[RacerEntity], on_duplicate_key_update: list[str] | None = None
     ) -> bool:
+        if on_duplicate_key_update is None:
+            on_duplicate_key_update = ["gender"]
         values = [
             {
                 "registration_number": racer.registration_number,
@@ -96,7 +97,7 @@ class RacerRepository(Repository[RacerEntity]):
                 racer_orm = RacerOrm(registration_number=racer_registration_number)
                 session.add(racer_orm)
 
-            racer_orm.status = RacerStatus.retired.value
+            racer_orm.status = RacerStatus.retired.value  # type: ignore[assignment]
 
             session.commit()
         except Exception as e:
@@ -126,8 +127,10 @@ class RacerConditionRepository(Repository[RacerConditionEntity]):
     def create_or_update_many(
         self,
         data: list[RacerConditionEntity],
-        on_duplicate_key_update: list[str] = ["weight", "adjust"],
+        on_duplicate_key_update: list[str] | None = None,
     ) -> bool:
+        if on_duplicate_key_update is None:
+            on_duplicate_key_update = ["weight", "adjust"]
         values = [_transform_racer_condition_entity(entity) for entity in data]
 
         upsert_strategy = create_upsert_strategy()
@@ -161,8 +164,10 @@ class RacerWinningRateAggregationRepository(Repository[RacerPerformanceEntity]):
     def create_or_update_many(
         self,
         data: list[RacerPerformanceEntity],
-        on_duplicate_key_update: list[str] = ["rate_in_all_stadium", "rate_in_event_going_stadium"],
+        on_duplicate_key_update: list[str] | None = None,
     ) -> bool:
+        if on_duplicate_key_update is None:
+            on_duplicate_key_update = ["rate_in_all_stadium", "rate_in_event_going_stadium"]
         values = [_transform_racer_performance_entity(entity) for entity in data]
 
         upsert_strategy = create_upsert_strategy()

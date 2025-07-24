@@ -1,7 +1,7 @@
 from datetime import datetime
 from enum import Enum
 
-from sqlalchemy import Boolean, Column, Date, DateTime, Float, Index, Integer, String, text
+from sqlalchemy import Boolean, Column, Date, DateTime, Float, Integer, String, text
 from sqlalchemy.sql.schema import ForeignKey
 
 from ..database import Base
@@ -33,7 +33,7 @@ class Event(Base):
 
     # hack: title を主キーはバグの温床
     #
-    # タイトルが一文字でも違っていたら（例えば公式サイトのクロールを何回かかけたときにタイトルが更新されていたら）データが重複して冪等性が担保できなくなる
+    # タイトルが一文字でも違っていたら(例えば公式サイトのクロールを何回かかけたときにタイトルが更新されていたら)データが重複して冪等性が担保できなくなる
     # かといってGPやCCみたいなダブル開催は [:stadium_tel_code, :starts_on] だけだと保持できないからすぐには解決策が浮かばない
 
     stadium_tel_code = Column(Integer, ForeignKey("stadiums.tel_code"), primary_key=True)

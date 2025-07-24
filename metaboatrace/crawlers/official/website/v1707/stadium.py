@@ -1,7 +1,10 @@
 from datetime import date
 
+from metaboatrace.crawlers.celery import app
+from metaboatrace.crawlers.utils import fetch_html_as_io
 from metaboatrace.models.racer import Racer
 from metaboatrace.models.stadium import Event, EventHolding, MotorRenewal, StadiumTelCode
+from metaboatrace.repositories import EventRepository, MotorRenewalRepository, RacerRepository
 from metaboatrace.scrapers.official.website.v1707.pages.event_holding_page.location import (
     create_event_holding_page_url,
 )
@@ -21,10 +24,6 @@ from metaboatrace.scrapers.official.website.v1707.pages.pre_inspection_informati
     extract_event_entries,
     extract_racers,
 )
-
-from metaboatrace.crawlers.celery import app
-from metaboatrace.crawlers.utils import fetch_html_as_io
-from metaboatrace.repositories import EventRepository, MotorRenewalRepository, RacerRepository
 
 
 @app.task
@@ -49,7 +48,7 @@ def crawl_pre_inspection_information_page(
 
     html_io.seek(0)
     event_entries = extract_event_entries(html_io)
-    if all([ee.quinella_rate_of_motor == 0 for ee in event_entries]):
+    if all(ee.quinella_rate_of_motor == 0 for ee in event_entries):
         motor_renewal_repository = MotorRenewalRepository()
         motor_renewal_repository.create_or_update(
             MotorRenewal(stadium_tel_code=stadium_tel_code, date=date)

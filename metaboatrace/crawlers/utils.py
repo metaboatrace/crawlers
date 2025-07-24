@@ -1,12 +1,12 @@
 import io
+import logging
 import os
 
 import requests
 from cachetools import TTLCache, cached
-
+from dotenv import load_dotenv
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
-from dotenv import load_dotenv
 
 load_dotenv()
 
@@ -22,8 +22,8 @@ def _fetch_html_text(url: str) -> str:
             url,
             timeout=30,  # 30秒のタイムアウト
             headers={
-                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
-            }
+                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+            },
         )
         response.raise_for_status()
         return response.text
@@ -45,11 +45,13 @@ def send_slack_notification(message: str) -> None:
     slack_channel = os.getenv("SLACK_CHANNEL", "#999-notice-dev")
 
     if not slack_token:
-        print("Warning: SLACK_BOT_TOKEN not set. Skipping Slack notification.")
+        logger = logging.getLogger(__name__)
+        logger.warning("SLACK_BOT_TOKEN not set. Skipping Slack notification.")
         return
 
     try:
         client = WebClient(token=slack_token)
         client.chat_postMessage(channel=slack_channel, text=message)
     except SlackApiError as e:
-        print(f"Error sending Slack notification: {e.response['error']}")
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error sending Slack notification: {e.response['error']}")
