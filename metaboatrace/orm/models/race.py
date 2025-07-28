@@ -54,6 +54,20 @@ class RaceEntry(Base):
         ),
         Index("idx_race_entries_date_racer", "date", "racer_registration_number"),
         Index("idx_race_entries_racer_date", "racer_registration_number", "date"),
+        Index(
+            "idx_race_entries_racer_stadium_date",
+            "racer_registration_number",
+            "stadium_tel_code",
+            "date",
+            "race_number",
+        ),
+        Index(
+            "idx_race_entries_date_stadium_multi",
+            "date",
+            "stadium_tel_code",
+            "racer_registration_number",
+            postgresql_include=["race_number", "pit_number"],
+        ),
     )
 
 
@@ -96,6 +110,17 @@ class RaceRecord(Base):
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, nullable=False, onupdate=datetime.utcnow)
 
+    __table_args__ = (
+        Index(
+            "idx_race_records_start_time_not_null",
+            "stadium_tel_code",
+            "date",
+            "race_number",
+            "pit_number",
+            postgresql_where=text("start_time IS NOT NULL"),
+        ),
+    )
+
 
 class WinningRaceEntry(Base):
     __tablename__ = "winning_race_entries"
@@ -132,6 +157,10 @@ class Odds(Base):
     ratio = Column(Float, nullable=False)
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
     updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    __table_args__ = (
+        Index("idx_odds_date_stadium_race", "date", "stadium_tel_code", "race_number"),
+    )
 
 
 # NOTE:

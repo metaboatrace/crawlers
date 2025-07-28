@@ -1,7 +1,7 @@
 from datetime import datetime
 from enum import Enum
 
-from sqlalchemy import Boolean, Column, Date, DateTime, Float, Integer, String, text
+from sqlalchemy import Boolean, Column, Date, DateTime, Float, Index, Integer, String, text
 from sqlalchemy.sql.schema import ForeignKey
 
 from ..database import Base
@@ -44,6 +44,8 @@ class Event(Base):
     is_canceled = Column(Boolean, server_default=text("false"), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, nullable=False, onupdate=datetime.utcnow)
+
+    __table_args__ = (Index("idx_events_starts_on_stadium", "starts_on", "stadium_tel_code"),)
 
 
 class WeatherCondition(Base):
