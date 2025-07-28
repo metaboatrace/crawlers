@@ -12,21 +12,19 @@
 
 1. `uv sync`
 
-1. `source .venv/bin/activate`
-
 1. `docker compose up`
 
 1. 環境変数 `DATABASE_URL` を設定
 
-1. `python scripts/initialize_or_update_db.py` を実行してテーブルを生成
+1. `uv run python scripts/initialize_or_update_db.py` を実行してテーブルを生成
 
-1. `python scripts/initialize_master_data.py` を実行して初期データをインポート
+1. `uv run python scripts/initialize_master_data.py` を実行して初期データをインポート
 
-1. `python -m celery -A metaboatrace.crawlers worker --loglevel=info`
+1. `uv run python -m celery -A metaboatrace.crawlers worker --loglevel=info`
 
-1. `python -m celery -A metaboatrace.crawlers flower` (管理画面)
+1. `uv run python -m celery -A metaboatrace.crawlers flower` (管理画面)
 
-1. `python -m celery -A metaboatrace.crawlers beat` (定期実行)
+1. `uv run python -m celery -A metaboatrace.crawlers beat` (定期実行)
 
 ## データのインポート/エクスポート
 
@@ -71,7 +69,7 @@ $ make hasura_export_metadata
 $ make hasura_apply_metadata
 ```
 
-適当にリクエストしてレスポンスを得られたらOK
+適当にリクエストしてレスポンスを得られたら OK
 
 ```bash
 $ curl -X POST \
@@ -90,7 +88,7 @@ $ curl -X POST \
 
 ### Celery で `+[NSCharacterSet initialize] may have been in progress in another thread when fork() was called.` のようなエラーが出る
 
-- `export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES` のように環境変数を設定してからワーカーや beat を起動する
+- `OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES uv run python -m celery -A metaboatrace.crawlers worker --loglevel=info` のように環境変数を設定してからワーカーや beat を起動する
 
 ### celery beat で `_dbm.error: cannot add item to database` というエラーが出る
 

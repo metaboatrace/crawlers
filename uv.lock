@@ -281,73 +281,6 @@ wheels = [
 ]
 
 [[package]]
-name = "crawlers"
-version = "0.1.0"
-source = { editable = "." }
-dependencies = [
-    { name = "cachetools" },
-    { name = "celery" },
-    { name = "cryptography" },
-    { name = "flower" },
-    { name = "metaboatrace-models" },
-    { name = "metaboatrace-scrapers" },
-    { name = "psycopg2-binary" },
-    { name = "pymysql" },
-    { name = "python-dotenv" },
-    { name = "pytz" },
-    { name = "redis" },
-    { name = "requests" },
-    { name = "slack-sdk" },
-    { name = "sqlalchemy" },
-    { name = "tqdm" },
-    { name = "types-cachetools" },
-    { name = "types-pytz" },
-    { name = "types-requests" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "black" },
-    { name = "mypy" },
-    { name = "pre-commit" },
-    { name = "pytest" },
-    { name = "ruff" },
-    { name = "types-cachetools" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "cachetools", specifier = ">=5.3.2" },
-    { name = "celery", specifier = ">=5.3.6" },
-    { name = "cryptography", specifier = ">=41.0.5" },
-    { name = "flower", specifier = ">=2.0.1" },
-    { name = "metaboatrace-models", specifier = ">=2.2.7" },
-    { name = "metaboatrace-scrapers", specifier = ">=3.3.1" },
-    { name = "psycopg2-binary", specifier = ">=2.9.9" },
-    { name = "pymysql", specifier = ">=1.1.0" },
-    { name = "python-dotenv", specifier = ">=1.1.0" },
-    { name = "pytz", specifier = ">=2023.3.post1" },
-    { name = "redis", specifier = ">=5.0.1" },
-    { name = "requests", specifier = ">=2.31.0" },
-    { name = "slack-sdk", specifier = ">=3.27.1" },
-    { name = "sqlalchemy", specifier = ">=2.0.23" },
-    { name = "tqdm", specifier = ">=4.66.1" },
-    { name = "types-cachetools", specifier = ">=5.5.0.20240820" },
-    { name = "types-pytz", specifier = ">=2023.3.1.1" },
-    { name = "types-requests", specifier = ">=2.31.0.2" },
-]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "black", specifier = ">=25.1.0" },
-    { name = "mypy", specifier = ">=1.15.0" },
-    { name = "pre-commit", specifier = ">=4.2.0" },
-    { name = "pytest", specifier = ">=8.3.5" },
-    { name = "ruff", specifier = ">=0.12.5" },
-    { name = "types-cachetools", specifier = ">=5.3.0.20240311" },
-]
-
-[[package]]
 name = "cryptography"
 version = "44.0.2"
 source = { registry = "https://pypi.org/simple" }
@@ -510,6 +443,73 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/65/90/75cd9cbb8321df3f1dd881bbb1ccfb7aeadb599f54f4e04125b75e9c78fc/kombu-5.5.1.tar.gz", hash = "sha256:a4c2250396cdfb947c5e5322f3094fd36c3f86a1cff655f5cffdf45f371dddb8", size = 461398 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/04/ca/9d39feb60a9bc4a452d022b4b46fd29c1487bc26c18f4a5deaa2861f20e6/kombu-5.5.1-py3-none-any.whl", hash = "sha256:3b66add422e1655235c7c9244000600368ef6f2ba66278a5cf0ba2e7b2dc6425", size = 209672 },
+]
+
+[[package]]
+name = "metaboatrace-crawlers"
+version = "0.1.0"
+source = { editable = "." }
+dependencies = [
+    { name = "cachetools" },
+    { name = "celery" },
+    { name = "cryptography" },
+    { name = "flower" },
+    { name = "metaboatrace-models" },
+    { name = "metaboatrace-scrapers" },
+    { name = "psycopg2-binary" },
+    { name = "pymysql" },
+    { name = "python-dotenv" },
+    { name = "pytz" },
+    { name = "redis" },
+    { name = "requests" },
+    { name = "slack-sdk" },
+    { name = "sqlalchemy" },
+    { name = "tqdm" },
+    { name = "types-cachetools" },
+    { name = "types-pytz" },
+    { name = "types-requests" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "black" },
+    { name = "mypy" },
+    { name = "pre-commit" },
+    { name = "pytest" },
+    { name = "ruff" },
+    { name = "types-cachetools" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "cachetools", specifier = ">=5.3.2" },
+    { name = "celery", specifier = ">=5.3.6" },
+    { name = "cryptography", specifier = ">=41.0.5" },
+    { name = "flower", specifier = ">=2.0.1" },
+    { name = "metaboatrace-models", specifier = ">=2.2.7" },
+    { name = "metaboatrace-scrapers", specifier = ">=3.3.1" },
+    { name = "psycopg2-binary", specifier = ">=2.9.9" },
+    { name = "pymysql", specifier = ">=1.1.0" },
+    { name = "python-dotenv", specifier = ">=1.1.0" },
+    { name = "pytz", specifier = ">=2023.3.post1" },
+    { name = "redis", specifier = ">=5.0.1" },
+    { name = "requests", specifier = ">=2.31.0" },
+    { name = "slack-sdk", specifier = ">=3.27.1" },
+    { name = "sqlalchemy", specifier = ">=2.0.23" },
+    { name = "tqdm", specifier = ">=4.66.1" },
+    { name = "types-cachetools", specifier = ">=5.5.0.20240820" },
+    { name = "types-pytz", specifier = ">=2023.3.1.1" },
+    { name = "types-requests", specifier = ">=2.31.0.2" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "black", specifier = ">=25.1.0" },
+    { name = "mypy", specifier = ">=1.15.0" },
+    { name = "pre-commit", specifier = ">=4.2.0" },
+    { name = "pytest", specifier = ">=8.3.5" },
+    { name = "ruff", specifier = ">=0.12.5" },
+    { name = "types-cachetools", specifier = ">=5.3.0.20240311" },
 ]
 
 [[package]]
