@@ -39,8 +39,10 @@ $ psql -h 127.0.0.1 -p 55432 -U postgres -d metaboatrace_development -f 20200501
 ### エクスポート
 
 ```bash
-$ pg_dump -h 127.0.0.1 -p 55432 -U postgres -d metaboatrace_development -n public --data-only --exclude-table='stadiums' --exclude-table='racers' -f 20200501.dump
+$ docker compose exec -it db pg_dump -U postgres -d metaboatrace_development -n public --data-only --exclude-table='stadiums' --exclude-table='racers' > 2023_2.dump
 ```
+
+※ `pg_dump` はホストコンピューターとコンテナに入っている PostgreSQL のバージョン間が一致しないとエラーが起きるので、 `docker compose` を利用
 
 ## Hasura Metadata の管理手順
 
